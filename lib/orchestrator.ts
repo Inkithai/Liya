@@ -170,7 +170,6 @@ export function buildStrategy(context: ShopperContext, memory: UserMemory, input
 }
 
 export function detectConflicts(input: string, context: ShopperContext, memory: UserMemory) {
-  const lower = input.toLowerCase();
   const conflicts: OrchestratorDecision["conflicts"] = [];
   if (!/[a-zA-Z\u0D80-\u0DFF\u0B80-\u0BFF]{3,}/.test(input) || /(.)\1{6,}/.test(input)) conflicts.push({ type: "chaos_input", message: "That message is a bit unclear.", resolution: "I’ll bring us back to the fastest shopping path: recipient, occasion, city, date, budget." });
   if (/(mom|mother|amma|wife|dad|father|friend).*(and|&|,).*(mom|mother|amma|wife|dad|father|friend)/i.test(input)) conflicts.push({ type: "multi_person", message: "This sounds like gifts for more than one person.", resolution: "I’ll plan one recipient first so checkout stays clean, then we can add the second gift." });

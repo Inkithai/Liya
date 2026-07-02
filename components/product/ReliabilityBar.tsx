@@ -18,6 +18,6 @@ export function ReliabilityBar() {
   const Icon = config.icon;
   return <div className={`mb-4 rounded-2xl px-4 py-3 text-xs font-bold ${config.cls}`}>
     <div className="flex flex-wrap items-center justify-between gap-2"><span className="flex items-center gap-2"><Icon size={15}/>{config.label}</span><span>{seconds !== undefined ? `Products updated ${seconds}s ago` : "Ready for live search"}</span></div>
-    <div className="mt-2 flex flex-wrap gap-2 text-[11px]"><span className="rounded-full bg-[hsl(var(--muted))] px-2.5 py-1 text-[hsl(var(--foreground))] dark:bg-black/20">Decision Confidence: {decisionConfidence}%</span><span className="rounded-full bg-[hsl(var(--muted))] px-2.5 py-1 text-[hsl(var(--foreground))] dark:bg-black/20">Delivery Confidence: {deliveryConfidence}</span><span className="rounded-full bg-[hsl(var(--muted))] px-2.5 py-1 text-[hsl(var(--foreground))] dark:bg-black/20">{config.fallback}</span></div>
+    <div className="mt-2 flex flex-wrap gap-2 text-[11px]"><span className="rounded-full bg-white/70 px-2.5 py-1 dark:bg-black/20">Decision Confidence: {decisionConfidence}%</span><span className="rounded-full bg-white/70 px-2.5 py-1 dark:bg-black/20">Delivery Confidence: {deliveryConfidence}</span><span className="rounded-full bg-white/70 px-2.5 py-1 dark:bg-black/20">{config.fallback}</span></div>
   </div>;
 }

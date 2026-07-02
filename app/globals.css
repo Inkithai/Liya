@@ -15,20 +15,20 @@
 
 :root {
   color-scheme: light;
-  --background: 25 80% 96%;
-  --foreground: 24 10% 10%;
-  --card: 25 30% 100%;
-  --muted: 25 50% 94%;
-  --border: 24 20% 82%;
+  --background: 30 92% 93%;
+  --foreground: 24 22% 7%;
+  --card: 34 100% 98%;
+  --muted: 28 70% 88%;
+  --border: 24 45% 72%;
 }
 
 .dark {
   color-scheme: dark;
-  --background: 24 18% 3%;
-  --foreground: 32 28% 98%;
-  --card: 24 16% 6%;
-  --muted: 24 13% 12%;
-  --border: 24 13% 18%;
+  --background: 24 24% 4%;
+  --foreground: 32 35% 96%;
+  --card: 24 22% 8%;
+  --muted: 24 18% 13%;
+  --border: 24 18% 28%;
 }
 
 * { box-sizing: border-box; }
@@ -36,9 +36,10 @@ html { scroll-behavior: smooth; }
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 8% 4%, rgba(249, 115, 22, 0.12), transparent 34rem),
-    radial-gradient(circle at 92% 10%, rgba(236, 72, 153, 0.10), transparent 30rem),
-    radial-gradient(circle at 40% 95%, rgba(34, 197, 94, 0.06), transparent 26rem),
+    radial-gradient(circle at 8% 4%, rgba(249, 115, 22, 0.24), transparent 34rem),
+    radial-gradient(circle at 92% 10%, rgba(236, 72, 153, 0.18), transparent 30rem),
+    radial-gradient(circle at 40% 95%, rgba(34, 197, 94, 0.10), transparent 26rem),
+    linear-gradient(135deg, rgba(255, 247, 237, .96), rgba(255, 213, 166, .78) 46%, rgba(251, 207, 232, .72)),
     hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
@@ -46,32 +47,29 @@ body {
 
 .dark body {
   background:
-    radial-gradient(circle at 8% 4%, rgba(249, 115, 22, 0.15), transparent 34rem),
-    radial-gradient(circle at 92% 10%, rgba(236, 72, 153, 0.12), transparent 30rem),
-    radial-gradient(circle at 40% 95%, rgba(34, 197, 94, 0.08), transparent 26rem),
-    hsl(var(--background));
+    radial-gradient(circle at 8% 4%, rgba(249, 115, 22, 0.18), transparent 30rem),
+    radial-gradient(circle at 92% 10%, rgba(236, 72, 153, 0.14), transparent 28rem),
+    radial-gradient(circle at 45% 90%, rgba(124, 58, 237, 0.12), transparent 28rem),
+    linear-gradient(135deg, #090604, #140b07 42%, #090607);
 }
 
 ::selection { background: rgba(249, 115, 22, .24); }
 
 .glass {
-  background: color-mix(in srgb, hsl(var(--card)) 92%, transparent);
-  backdrop-filter: blur(22px) saturate(140%);
-  border: 1px solid color-mix(in srgb, hsl(var(--border)) 85%, transparent);
+  background: color-mix(in srgb, hsl(var(--card)) 88%, transparent);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid color-mix(in srgb, hsl(var(--border)) 92%, transparent);
+  box-shadow: 0 24px 80px rgba(124, 45, 18, .10);
 }
-
 .dark .glass {
-  background: color-mix(in srgb, hsl(var(--card)) 90%, transparent);
-  border: 1px solid color-mix(in srgb, hsl(var(--border)) 85%, transparent);
+  background: rgba(18, 12, 9, .86);
+  border-color: rgba(255,255,255,.16);
+  box-shadow: 0 24px 90px rgba(0,0,0,.45);
 }
 
 .soft-grid {
   background-image: linear-gradient(rgba(249, 115, 22, .05) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, .05) 1px, transparent 1px);
   background-size: 32px 32px;
-}
-
-.dark .soft-grid {
-  background-image: linear-gradient(rgba(249, 115, 22, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(249, 115, 22, .08) 1px, transparent 1px);
 }
 
 .focus-ring:focus-visible {

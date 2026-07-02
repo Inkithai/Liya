@@ -48,7 +48,7 @@ type AppState = {
   setReliabilityMode: (mode: ReliabilityMode) => void;
 };
 
-export const useAppStore = create<AppState>()(persist((set, get) => ({
+export const useAppStore = create<AppState>()(persist((set) => ({
   sessionId: id(),
   language: "en",
   context: { language: "en" },

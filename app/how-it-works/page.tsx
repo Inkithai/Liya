@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, ArrowRight, Brain, CheckCircle2, Clock3, Gift, Languages, MapPin, Mic, PackageCheck, RefreshCcw, Search, ShieldCheck, ShoppingCart, Sparkles, Truck, Zap } from "lucide-react";
+import { AlertTriangle, ArrowRight, Brain, CheckCircle2, Clock3, Gift, Languages, Mic, PackageCheck, RefreshCcw, Search, ShieldCheck, ShoppingCart, Sparkles, Truck, Zap } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";

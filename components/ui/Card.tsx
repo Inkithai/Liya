@@ -2,5 +2,5 @@ import { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-[2rem] border border-black/5 bg-[hsl(var(--card))] p-5 shadow-2xl shadow-black/[0.04] backdrop-blur-xl dark:border-white/10 dark:bg-[hsl(var(--card))]", className)} {...props} />;
+  return <div className={cn("rounded-[2rem] border border-orange-900/15 bg-orange-50/90 p-5 shadow-2xl shadow-orange-950/[0.08] backdrop-blur-xl dark:border-white/15 dark:bg-white/[0.08] dark:shadow-black/30", className)} {...props} />;
 }

@@ -1,7 +1,7 @@
 import type { CheckoutInput, Currency, DeliveryQuote, OrderResult, Product, TrackingResult } from "@/types";
 import { compact, sleep } from "./utils";
 
-const MCP_ENDPOINT = process.env.NEXT_PUBLIC_KAPRUKA_MCP_ENDPOINT || (typeof window !== "undefined" ? "/api/mcp" : "https://mcp.kapruka.com/mcp");
+const MCP_ENDPOINT = typeof window !== "undefined" ? "/api/mcp" : (process.env.KAPRUKA_MCP_ENDPOINT || "https://mcp.kapruka.com/mcp");
 const PROTOCOL_VERSION = "2024-11-05";
 
 type JsonRpcRequest = { jsonrpc: "2.0"; id?: number; method: string; params?: unknown };
@@ -87,13 +87,40 @@ function unwrapToolResult(result: ToolResult | unknown): unknown {
   return parsed.length === 1 ? parsed[0] : parsed;
 }
 
+function productsFromMarkdown(markdown: string): Product[] {
+  const products: Product[] = [];
+  const blocks = markdown.split(/\n\n(?=\*\*\d+\.)/g);
+  for (const block of blocks) {
+    const title = block.match(/\*\*\d+\.\s+(.+?)\*\*/);
+    const id = block.match(/ID:\s*`([^`]+)`/i);
+    const price = block.match(/(?:LKR|Rs\.?|රු)\s*([0-9,]+(?:\.\d+)?)/i);
+    const url = block.match(/\[View product\]\((https?:\/\/[^)]+)\)/i);
+    if (!title || !id) continue;
+    products.push({
+      id: id[1],
+      name: title[1].trim(),
+      price: price ? Number(price[1].replace(/,/g, "")) : undefined,
+      currency: "LKR",
+      url: url?.[1],
+      category: "Kapruka",
+      inStock: /in stock/i.test(block),
+      deliveryNote: /ships internationally/i.test(block) ? "Ships internationally" : undefined,
+      description: block.replace(/\s+/g, " ").slice(0, 220),
+      raw: block
+    });
+  }
+  return products;
+}
+
 function extractProducts(data: unknown): Product[] {
   const root = unwrapToolResult(data);
   const candidates: unknown[] = [];
+  if (typeof root === "string") return productsFromMarkdown(root);
   if (Array.isArray(root)) candidates.push(...root);
   if (root && typeof root === "object") {
     const r = root as Record<string, unknown>;
     for (const key of ["products", "items", "results", "data"]) if (Array.isArray(r[key])) candidates.push(...(r[key] as unknown[]));
+    for (const key of ["result", "markdown", "text"]) if (typeof r[key] === "string") candidates.push(...productsFromMarkdown(r[key] as string));
   }
   return candidates.filter((x) => x && typeof x === "object").map(normalizeProduct);
 }
@@ -186,7 +213,7 @@ export class KaprukaMcpClient {
     const key = stableKey({ name, args });
     const existing = this.inFlight.get(key);
     if (existing) return existing as Promise<T>;
-    const promise = this.request<ToolResult>("tools/call", { name, arguments: args }).then((r) => unwrapToolResult(r) as T).finally(() => this.inFlight.delete(key));
+    const promise = this.request<ToolResult>("tools/call", { name, arguments: { params: args } }).then((r) => unwrapToolResult(r) as T).finally(() => this.inFlight.delete(key));
     this.inFlight.set(key, promise);
     return promise;
   }

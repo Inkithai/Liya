@@ -63,10 +63,11 @@ Runtime uses only the hosted Kapruka MCP endpoint:
 https://mcp.kapruka.com/mcp
 ```
 
-You can override it for environments without changing code:
+The app works without env vars. Browser requests go through `/api/mcp` to avoid CORS/fetch failures. You can optionally override the server-side MCP endpoint:
 
 ```bash
-NEXT_PUBLIC_KAPRUKA_MCP_ENDPOINT=https://mcp.kapruka.com/mcp
+# Optional server-only override; normally leave unset
+KAPRUKA_MCP_ENDPOINT=https://mcp.kapruka.com/mcp
 ```
 
 Do not point this app at a forked MCP server for the challenge.
@@ -177,7 +178,8 @@ Liya changes tone for local conversation and includes Sri Lankan warmth without 
 5. Add environment variable if desired:
 
 ```txt
-NEXT_PUBLIC_KAPRUKA_MCP_ENDPOINT=https://mcp.kapruka.com/mcp
+# Optional server-only override; normally leave unset
+KAPRUKA_MCP_ENDPOINT=https://mcp.kapruka.com/mcp
 ```
 
 6. Deploy.
