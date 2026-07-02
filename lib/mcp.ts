@@ -1,7 +1,7 @@
 import type { CheckoutInput, Currency, DeliveryQuote, OrderResult, Product, TrackingResult } from "@/types";
 import { compact, sleep } from "./utils";
 
-const MCP_ENDPOINT = process.env.NEXT_PUBLIC_KAPRUKA_MCP_ENDPOINT || "https://mcp.kapruka.com/mcp";
+const MCP_ENDPOINT = process.env.NEXT_PUBLIC_KAPRUKA_MCP_ENDPOINT || (typeof window !== "undefined" ? "/api/mcp" : "https://mcp.kapruka.com/mcp");
 const PROTOCOL_VERSION = "2024-11-05";
 
 type JsonRpcRequest = { jsonrpc: "2.0"; id?: number; method: string; params?: unknown };
