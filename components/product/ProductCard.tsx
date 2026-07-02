@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { Eye, Heart, Plus, Scale, Sparkles } from "lucide-react";
+import { Eye, ExternalLink, Heart, Plus, Scale, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import type { Product, ShopperContext } from "@/types";
@@ -19,6 +19,7 @@ export function ProductCard({ product, context, featured = false }: { product: P
   const toggleCompare = useAppStore((s) => s.toggleCompare);
   const addRecentlyViewed = useAppStore((s) => s.addRecentlyViewed);
   const wishlist = useAppStore((s) => s.wishlist.some((p) => p.id === product.id));
+  const compareIds = useAppStore((s) => s.compareIds);
   const memory = useAppStore((s) => s.memory);
   const reasons = explainProduct(product, context, memory, featured ? 0 : 1);
   const badges = explanationBadges(product, context, memory);
@@ -33,18 +34,23 @@ export function ProductCard({ product, context, featured = false }: { product: P
       action: product.url ? { label: "Open", onClick: () => window.open(product.url, "_blank") } : undefined
     });
   };
+  const handleCompare = () => {
+    toggleCompare(product.id);
+    const isAdded = !compareIds.includes(product.id);
+    toast(isAdded ? "Added to comparison, See Below." : "Removed from comparison");
+  };
   return <motion.article layout initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="group overflow-hidden rounded-[2rem] border border-black/5 bg-white/85 shadow-xl shadow-black/[0.04] dark:border-white/10 dark:bg-white/[0.06]">
     <div className="relative aspect-[4/3] overflow-hidden bg-liya-100/50">
       <Image src={product.image || fallback} alt={product.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes={featured ? "(min-width: 1024px) 35vw, 90vw" : "(min-width: 1024px) 22vw, 90vw"} />
-      <div className="absolute left-3 top-3 rounded-full bg-white/88 px-3 py-1 text-xs font-semibold shadow-lg backdrop-blur">{product.category ?? "Kapruka"}</div>
-      <div className={`absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs font-black shadow-lg backdrop-blur ${trust.tone === "green" ? "bg-green-600 text-white" : trust.tone === "amber" ? "bg-amber-500 text-white" : "bg-white/90 text-ink"}`}>{trust.label}</div>
-      <button aria-label="Wishlist" onClick={() => { toggleWishlist(product); toast.success(wishlist ? "Removed from wishlist" : "Saved for later") }} className="focus-ring absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/88 shadow-lg backdrop-blur"><Heart size={18} className={wishlist ? "fill-pink-500 text-pink-500" : ""}/></button>
+      <div title={`Category: ${product.category ?? "Kapruka"}`} className="absolute left-3 top-3 rounded-full bg-white/88 px-3 py-1 text-xs font-semibold shadow-lg backdrop-blur">{product.category ?? "Kapruka"}</div>
+      <div title={`Trust: ${trust.label}`} className={`absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs font-black shadow-lg backdrop-blur ${trust.tone === "green" ? "bg-green-600 text-white" : trust.tone === "amber" ? "bg-amber-500 text-white" : "bg-white/90 text-ink"}`}>{trust.label}</div>
+      <button title={wishlist ? "Remove from wishlist" : "Add to wishlist"} aria-label="Wishlist" onClick={() => { toggleWishlist(product); toast.success(wishlist ? "Removed from wishlist" : "Saved for later") }} className="focus-ring absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-white/88 shadow-lg backdrop-blur"><Heart size={18} className={wishlist ? "fill-pink-500 text-pink-500" : ""}/></button>
     </div>
     <div className="p-4">
-      <div className="flex items-start justify-between gap-3"><h3 className="line-clamp-2 font-bold leading-snug">{product.name}</h3><p className="shrink-0 font-black text-liya-700 dark:text-liya-300">{formatLkr(product.price, product.currency)}</p></div>
-      <p className="mt-3 rounded-2xl bg-white/70 p-3 text-sm italic leading-5 text-black/65 dark:bg-white/10 dark:text-white/70">“{emotionalLine}”</p>
-      <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Recommendation reasons">{badges.map((badge) => <span key={badge} className="rounded-full bg-liya-50 px-2.5 py-1 text-[11px] font-bold text-liya-800 dark:bg-liya-500/10 dark:text-liya-200"><Sparkles className="mr-1 inline h-3 w-3" />{badge}</span>)}</div>
-      <div className="mt-4 flex gap-2"><Button className="flex-1" size="sm" onClick={() => { addToCart(product); toast.success("Added to cart — nice choice!") }}><Plus size={16}/> Add</Button><Button variant="secondary" size="sm" aria-label="Why this product" onClick={explainDecision}>Why?</Button><Button variant="secondary" size="sm" aria-label="Quick view" onClick={() => { addRecentlyViewed(product); toast(product.name, { description: reasons[0] ?? product.description ?? recommendationWhy(product, context), action: product.url ? { label: "Open", onClick: () => window.open(product.url, "_blank") } : undefined }); }}><Eye size={16}/></Button><Button variant="secondary" size="sm" aria-label="Compare" onClick={() => toggleCompare(product.id)}><Scale size={16}/></Button></div>
+      <div className="flex items-start justify-between gap-3"><h3 title={product.name} className="line-clamp-2 font-bold leading-snug">{product.name}</h3><p title={`Price: ${formatLkr(product.price, product.currency)}`} className="shrink-0 font-black text-liya-700 dark:text-liya-300">{formatLkr(product.price, product.currency)}</p></div>
+      <p title={`Why this gift: ${emotionalLine}`} className="mt-3 rounded-2xl bg-white/70 p-3 text-sm italic leading-5 text-black/65 dark:bg-white/10 dark:text-white/70">"{emotionalLine}"</p>
+      <div className="mt-3 flex flex-wrap gap-1.5" aria-label="Recommendation reasons">{badges.map((badge) => <span key={badge} title={`Reason: ${badge}`} className="rounded-full bg-liya-50 px-2.5 py-1 text-[11px] font-bold text-liya-800 dark:bg-liya-500/10 dark:text-liya-200"><Sparkles className="mr-1 inline h-3 w-3" />{badge}</span>)}</div>
+      <div className="mt-4 flex flex-wrap gap-2"><Button title="Add to cart" className="flex-1 min-w-[80px]" size="sm" onClick={() => { addToCart(product); toast.success("Added to cart — nice choice!") }}><Plus size={16}/> Add</Button><Button title="See why Liya chose this" variant="secondary" size="sm" aria-label="Why this product" onClick={explainDecision}>Why?</Button><Button title="Quick view details" variant="secondary" size="sm" aria-label="Quick view" onClick={() => { addRecentlyViewed(product); toast(product.name, { description: reasons[0] ?? product.description ?? recommendationWhy(product, context), action: product.url ? { label: "Open", onClick: () => window.open(product.url, "_blank") } : undefined }); }}><Eye size={16}/></Button><Button title="Compare with other products" variant="secondary" size="sm" aria-label="Compare" onClick={handleCompare}><Scale size={16}/></Button>{product.url && <Button title="Open product page" variant="secondary" size="sm" aria-label="Open product" onClick={() => window.open(product.url, "_blank")}><ExternalLink size={16}/></Button>}</div>
     </div>
   </motion.article>;
 }
