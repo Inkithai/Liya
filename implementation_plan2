@@ -1,0 +1,63 @@
+# Fix Light & Dark Mode UI and Functional Bugs
+
+This plan addresses the UI contrast/visibility issues in Light and Dark modes, missing color scales, and potential functional bugs across the application.
+
+## Open Questions
+- Is there any specific missing link or button you've experienced issues with that is not listed in the functional bugs section below?
+- Are you okay with me replacing hardcoded colors (`bg-white/70`, `text-black/55`) with semantic theme variables (`bg-card`, `text-muted-foreground`) to guarantee flawless switching between modes?
+
+## Proposed Changes
+
+### Configuration & Global CSS
+
+#### [MODIFY] [globals.css](file:///d:/Projects/Liya/app/globals.css)
+- Add missing `--color-liya-*` and `--color-ink` scales to `@theme`.
+- Enable class-based dark mode in Tailwind v4 by adding `@custom-variant dark (&:is(.dark *));`. This single line fixes the issue where `dark:text-white` fails to apply when switching themes.
+- Update semantic variables (`--background`, `--foreground`, `--card`, etc.) to use valid Hex/RGB colors instead of raw HSL values, as Tailwind v4 requires valid CSS colors in `@theme`.
+- Add dark mode inversions for all semantic variables in `.dark`.
+
+### Component Refactoring
+
+I will refactor the following components to replace hardcoded utility classes (e.g., `bg-white/70`, `text-black/55`) with semantic tokens (e.g., `bg-card`, `text-muted-foreground`). This will eliminate all text visibility issues and ensure components automatically adapt to themes.
+
+#### [MODIFY] [ProductCard.tsx](file:///d:/Projects/Liya/components/product/ProductCard.tsx)
+- Replace explicit light/dark background and text colors with semantic `bg-card`, `text-card-foreground`, and `text-muted-foreground`.
+
+#### [MODIFY] [ProductShelf.tsx](file:///d:/Projects/Liya/components/product/ProductShelf.tsx)
+- Update table borders, table header text colors, and the comparison section background to use `bg-muted` and `border-border`.
+
+#### [MODIFY] [ChatPanel.tsx](file:///d:/Projects/Liya/components/chat/ChatPanel.tsx)
+- Fix chat bubble colors so user messages use `bg-primary text-primary-foreground` (or `bg-ink text-white`) and assistant messages use `bg-card text-card-foreground`.
+- Ensure the input text area has sufficient contrast.
+
+#### [MODIFY] [FloatingCart.tsx](file:///d:/Projects/Liya/components/cart/FloatingCart.tsx) & [MobileCartBar.tsx](file:///d:/Projects/Liya/components/cart/MobileCartBar.tsx)
+- Replace hardcoded background colors for cart items with `bg-card`.
+
+#### [MODIFY] [Header.tsx](file:///d:/Projects/Liya/components/layout/Header.tsx) & [Logo.tsx](file:///d:/Projects/Liya/components/layout/Logo.tsx)
+- Update sticky header transparency and borders using semantic colors.
+
+#### [MODIFY] [EmptyState.tsx](file:///d:/Projects/Liya/components/ui/EmptyState.tsx) & [Skeleton.tsx](file:///d:/Projects/Liya/components/ui/Skeleton.tsx)
+- Ensure empty states and skeletons have correct contrast ratios.
+
+### Pages Refactoring
+
+#### [MODIFY] [page.tsx](file:///d:/Projects/Liya/app/page.tsx) & [how-it-works/page.tsx](file:///d:/Projects/Liya/app/how-it-works/page.tsx)
+- Refactor marketing sections, grids, and cards to use semantic variables for seamless theme support.
+
+#### [MODIFY] [checkout/page.tsx](file:///d:/Projects/Liya/app/checkout/page.tsx)
+- Refactor form fields (`input`, `textarea`) to use `bg-card`, `border-border`, and `text-foreground`.
+- **Functional Bug Fix**: Fix any missing required field validations or form submission handlers. Ensure the `paymentUrl` logic and routing buttons function correctly even if cart state is unexpected.
+
+#### [MODIFY] [track/page.tsx](file:///d:/Projects/Liya/app/track/page.tsx) & [review/page.tsx](file:///d:/Projects/Liya/app/review/page.tsx)
+- Ensure tracking timelines and review carts render text properly with `text-foreground`.
+
+## Verification Plan
+
+### Automated Tests
+- Run `npm run lint` and `npm run typecheck` to ensure no typing or linting errors are introduced.
+
+### Manual Verification
+1. I will visually inspect the application via the local server.
+2. I will toggle between Light Mode and Dark Mode to verify all components automatically adapt.
+3. I will test adding an item to the cart, navigating to checkout, filling out the form, and generating the payment link.
+4. I will verify that `text-liya-500` now correctly applies the `liya` brand color instead of falling back to default styling.
