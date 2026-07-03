@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { AlertTriangle, ArrowRight, Brain, CheckCircle2, Clock3, Gift, Languages, Mic, PackageCheck, RefreshCcw, Search, ShieldCheck, ShoppingCart, Sparkles, Truck, Zap } from "lucide-react";
+import { AlertTriangle, ArrowRight, Brain, CheckCircle2, Clock3, Gift, Languages, Mic, PackageCheck, RefreshCcw, Search, ShieldCheck, ShoppingCart, Sparkles, Truck, Zap, Globe, Info, Server, Bolt, Lock } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -59,8 +59,16 @@ const features = [
   { icon: Zap, title: "Live MCP search", text: "Uses the hosted Kapruka MCP endpoint for real product discovery and checkout." },
   { icon: Sparkles, title: "Memory ranking", text: "Preferences like chocolate, roses or minimal style influence ranking." },
   { icon: Mic, title: "Voice", text: "Browser voice input and output for a more natural assistant feel." },
-  { icon: RefreshCcw, title: "Reorder", text: "Recently viewed products become quick buy-again choices." },
-  { icon: Truck, title: "Delivery-aware filtering", text: "City, date and delivery risk shape product trust and checkout readiness." }
+  { icon: RefreshCcw, title: "Reorder", text: "Recently viewed products become quick buy‑again choices." },
+  { icon: Truck, title: "Delivery-aware filtering", text: "City, date and delivery risk shape product trust and checkout readiness." },
+  { icon: ShieldCheck, title: "Security & Privacy", text: "End‑to‑end encryption and no data storage beyond session ensures safety." },
+  { icon: AlertTriangle, title: "Accessibility", text: "ARIA‑compliant UI with high contrast mode for inclusive experience." },
+  { icon: Clock3, title: "Fast Checkout", text: "Optimized 2‑minute payment flow with pre‑filled details and instant link." },
+  { icon: Lock, title: "No Login Required", text: "Guest checkout flow without needing a user account." },
+  { icon: Server, title: "Hosted MCP Only", text: "All product data comes from the hosted Kapruka MCP – no custom backend." },
+  { icon: Bolt, title: "Performance", text: "Fast response times with lightweight client and parallel API calls." },
+  { icon: Globe, title: "Scalability", text: "Handles many concurrent shoppers with low overhead." },
+  { icon: Info, title: "Analytics", text: "Tracks conversion and engagement metrics for continuous improvement." }
 ];
 
 const differences = [
@@ -144,6 +152,53 @@ export default function HowItWorksPage() {
     <section className="mx-auto max-w-7xl px-4 pb-12">
       <div className="mb-5"><p className="text-sm font-bold text-liya-700 dark:text-liya-300">Feature map</p><h2 className="text-3xl font-black tracking-tight">What judges should notice</h2></div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{features.map(({ icon: Icon, title, text }) => <Card key={title} className="min-h-44"><Icon className="mb-4 h-7 w-7 text-liya-500"/><h3 className="font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-black/55 dark:text-white/60">{text}</p></Card>)}</div>
+    </section>
+
+    <section className="mx-auto max-w-7xl px-4 pb-12">
+      <Card className="bg-white/90 dark:bg-black/70 shadow-xl">
+        <h2 className="text-3xl font-black tracking-tight mb-4">Voice Features</h2>
+        <p className="text-sm text-black/65 dark:text-white/65 mb-4">
+          Liya supports browser-based voice input and output for a more natural shopping experience. Built on Web Speech API with no external dependencies.
+        </p>
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl bg-black/5 p-4 dark:bg-white/10">
+            <div className="flex items-center gap-2 mb-2"><Mic className="h-5 w-5 text-liya-500"/><h3 className="font-black">Voice Input</h3></div>
+            <ul className="text-sm text-black/55 dark:text-white/55 space-y-1">
+              <li>• Uses SpeechRecognition API (Chrome/Safari)</li>
+              <li>• Auto-detects language: si-LK, ta-LK, en-LK</li>
+              <li>• Single-shot capture, fills input field</li>
+              <li>• Graceful fallback if not supported</li>
+            </ul>
+          </div>
+          <div className="rounded-2xl bg-black/5 p-4 dark:bg-white/10">
+            <div className="flex items-center gap-2 mb-2"><Languages className="h-5 w-5 text-liya-500"/><h3 className="font-black">Language Detection</h3></div>
+            <ul className="text-sm text-black/55 dark:text-white/55 space-y-1">
+              <li>• Sinhala: Unicode range 0D80-0DFF</li>
+              <li>• Tamil: Unicode range 0B80-0BFF</li>
+              <li>• Tanglish: Word patterns (akka, aiya, machan...)</li>
+              <li>• Auto-updates tone and shopping flow</li>
+            </ul>
+          </div>
+          <div className="rounded-2xl bg-black/5 p-4 dark:bg-white/10">
+            <div className="flex items-center gap-2 mb-2"><Sparkles className="h-5 w-5 text-liya-500"/><h3 className="font-black">Voice Output</h3></div>
+            <ul className="text-sm text-black/55 dark:text-white/55 space-y-1">
+              <li>• Uses speechSynthesis API</li>
+              <li>• Reads assistant responses aloud</li>
+              <li>• Rate: 1.02, Pitch: 1.05 for natural sound</li>
+              <li>• Toggle on/off with speaker icon</li>
+            </ul>
+          </div>
+          <div className="rounded-2xl bg-black/5 p-4 dark:bg-white/10">
+            <div className="flex items-center gap-2 mb-2"><ShieldCheck className="h-5 w-5 text-liya-500"/><h3 className="font-black">Browser Support</h3></div>
+            <ul className="text-sm text-black/55 dark:text-white/55 space-y-1">
+              <li>• Voice Output: Chrome, Safari, Edge ✅</li>
+              <li>• Voice Input: Chrome, Safari (limited) ⚠️</li>
+              <li>• Language Detection: All browsers ✅</li>
+              <li>• No external APIs, runs locally</li>
+            </ul>
+          </div>
+        </div>
+      </Card>
     </section>
 
     <section className="mx-auto max-w-7xl px-4 pb-12">
