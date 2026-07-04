@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="0.52" stop-color="#ffedd5"/><stop offset="1" stop-color="#fce7f3"/></linearGradient><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#7c2d12" flood-opacity="0.14"/></filter></defs>
+<rect x="0" y="0" width="1200" height="900" rx="0" fill="url(#bg)" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="1020" cy="80" r="210" fill="#ec4899" opacity="0.13"/><circle cx="140" cy="810" r="230" fill="#f97316" opacity="0.14"/>
+<g filter="url(#shadow)"><rect x="70" y="58" width="1060" height="784" rx="42" fill="#ffffff" stroke="none" stroke-width="1" opacity="1"/></g>
+<rect x="70" y="58" width="1060" height="92" rx="42" fill="#140b07" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="125" cy="104" r="18" fill="#f97316"/><circle cx="175" cy="104" r="18" fill="#ec4899"/><circle cx="225" cy="104" r="18" fill="#16a34a"/>
+<text x="600" y="112" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffffff" text-anchor="middle">Liya judge demo screenshot</text>
+<text x="110" y="210" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="46" font-weight="900" fill="#1c120a" text-anchor="start">04 — Honest comparison</text>
+<text x="112" y="260" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">Selected products are compared by fit, delivery, budget and</text>
+<text x="112" y="294" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">tradeoff.</text>
+<rect x="112" y="340" width="976" height="92" rx="28" fill="#dcfce7" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="142" y="378" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">🏆 Best overall</text>
+<text x="142" y="412" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="900" fill="#1c120a" text-anchor="start">6 Red Rose Bouquet — sincere, fast, close to budget</text>
+<rect x="112" y="454" width="976" height="92" rx="28" fill="#fff7ed" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="142" y="492" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Budget comfort</text>
+<text x="142" y="526" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="900" fill="#1c120a" text-anchor="start">Chocolate Hamper — good backup, less emotional impact</text>
+<rect x="112" y="568" width="976" height="92" rx="28" fill="#fef3c7" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="142" y="606" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Premium stretch</text>
+<text x="142" y="640" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="900" fill="#1c120a" text-anchor="start">Cake + Flowers — impressive, but over budget</text>
+<rect x="112" y="682" width="86" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="155.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">price</text>
+<rect x="208" y="682" width="108" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="262.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">delivery</text>
+<rect x="330" y="682" width="108" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="384.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">best for</text>
+<rect x="452" y="682" width="108" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="506.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">tradeoff</text>
+<rect x="574" y="682" width="88" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="618.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">remove</text>
+<text x="1065" y="812" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" fill="#9a3412" text-anchor="end">liya-ten.vercel.app</text>
+</svg>

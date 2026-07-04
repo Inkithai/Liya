@@ -1,6 +1,7 @@
 "use client";
 
 import Link from"next/link";
+import Image from"next/image";
 import { useState } from"react";
 import { motion } from"framer-motion";
 import { AlertTriangle, ArrowRight, Brain, CheckCircle2, Clock3, Gift, Languages, Mic, PackageCheck, RefreshCcw, Search, ShieldCheck, ShoppingCart, Sparkles, Truck, Zap, Globe, Info, Server, Bolt, Lock } from"lucide-react";
@@ -61,14 +62,14 @@ const features = [
  { icon: Mic, title:"Voice", text:"Browser voice input and output for a more natural assistant feel." },
  { icon: RefreshCcw, title:"Reorder", text:"Recently viewed products become quick buy‑again choices." },
  { icon: Truck, title:"Delivery-aware filtering", text:"City, date and delivery risk shape product trust and checkout readiness." },
- { icon: ShieldCheck, title:"Security & Privacy", text:"End‑to‑end encryption and no data storage beyond session ensures safety." },
+ { icon: ShieldCheck, title:"Security & Privacy", text:"Hosted MCP boundary, no secret keys in the browser, and only session-local shopping memory." },
  { icon: AlertTriangle, title:"Accessibility", text:"ARIA‑compliant UI with high contrast mode for inclusive experience." },
  { icon: Clock3, title:"Fast Checkout", text:"Optimized 2‑minute payment flow with pre‑filled details and instant link." },
  { icon: Lock, title:"No Login Required", text:"Guest checkout flow without needing a user account." },
  { icon: Server, title:"Hosted MCP Only", text:"All product data comes from the hosted Kapruka MCP – no custom backend." },
  { icon: Bolt, title:"Performance", text:"Fast response times with lightweight client and parallel API calls." },
  { icon: Globe, title:"Scalability", text:"Handles many concurrent shoppers with low overhead." },
- { icon: Info, title:"Analytics", text:"Tracks conversion and engagement metrics for continuous improvement." }
+ { icon: Info, title:"Conversion signals", text:"Readiness bars, trust labels and next-step nudges make the 7-minute-to-2-minute improvement visible." }
 ];
 
 const differences = [
@@ -98,9 +99,109 @@ const replayScenarios = [
  { label:"Cheap but premium", href:"/shop?stress=conflict", before:"cheap but premium", after:"Tradeoff resolved calmly" }
 ];
 
+const labScenarios = [
+ {
+ label:"Forgot birthday",
+ prompt:"I forgot my wife’s birthday. Kandy tomorrow. Rs. 5,000.",
+ detected:["apology", "wife", "Kandy", "tomorrow", "Rs. 5,000"],
+ strategy:"Relationship repair → roses + chocolate + safer delivery",
+ search:"apology roses chocolate sorry card gift",
+ trust:"Safe-to-buy if city/date verified",
+ next:"Choose one standout or compare top 3",
+ href:"/demo"
+ },
+ {
+ label:"Not sure what to buy",
+ prompt:"Need a gift for my sister in Dambulla under 8k, maybe tomorrow.",
+ detected:["sister", "Dambulla", "budget", "tomorrow", "uncertain preference"],
+ strategy:"Value optimizer → ask one high-value question, keep shelf flexible",
+ search:"gift flowers cake chocolate sister under 8000",
+ trust:"Verify delivery before payment",
+ next:"Confirm occasion, then shortlist",
+ href:"/shop"
+ },
+ {
+ label:"Fast delivery rescue",
+ prompt:"Need something today for a colleague, Colombo, around Rs. 4,000.",
+ detected:["urgent", "colleague", "Colombo", "today", "Rs. 4,000"],
+ strategy:"Urgent delivery → in-stock, less custom, low risk",
+ search:"same day delivery cake flowers gift",
+ trust:"Prioritize stock + delivery confidence",
+ next:"Add safest pick, then checkout",
+ href:"/shop?stress=conflict"
+ }
+];
+
+function StepPreview({ active }: { active: number }) {
+ const frames = [
+ {
+ tag:"Conversation start",
+ title:"Messy human request",
+ body:"I messed up. Wife is angry. Kandy tomorrow. Rs. 5,000.",
+ chips:["apology", "wife", "Kandy", "tomorrow"],
+ footer:"Liya asks less, understands more",
+ image:"/how-it-works/step-1-conversation.svg"
+ },
+ {
+ tag:"Plan + memory",
+ title:"Intent translated into constraints",
+ body:"Relationship repair strategy: sincere, not flashy. Remember: roses + chocolate.",
+ chips:["mood: apology", "budget lock", "delivery risk"],
+ footer:"Visible decision trace",
+ image:"/how-it-works/step-2-plan.svg"
+ },
+ {
+ tag:"Live MCP shelf",
+ title:"Real products from Kapruka MCP",
+ body:"6 Red Rose Bouquet, chocolate hamper, cake combo — ranked by fit and delivery.",
+ chips:["live price", "image URL", "stock"],
+ footer:"No fake catalog",
+ image:"/how-it-works/step-3-shelf.svg"
+ },
+ {
+ tag:"Why this pick",
+ title:"Not just search results",
+ body:"Best pick wins because it balances apology tone, price comfort, and delivery confidence.",
+ chips:["best overall", "tradeoff", "trust label"],
+ footer:"Honest comparison",
+ image:"/how-it-works/step-4-comparison.svg"
+ },
+ {
+ tag:"Cart + bundle",
+ title:"Persistent cart beside chat",
+ body:"Add hero item, adjust quantity, keep conversation and shelf alive.",
+ chips:["cart total", "review", "reorder"],
+ footer:"No page-hopping",
+ image:"/how-it-works/step-5-cart.svg"
+ },
+ {
+ tag:"Checkout link",
+ title:"From 7 minutes to about 2",
+ body:"Delivery check, guest details, gift/order message, payment link, tracking.",
+ chips:["delivery", "payment", "tracking"],
+ footer:"Friction removed",
+ image:"/how-it-works/step-6-checkout.svg"
+ }
+ ];
+ const frame = frames[active] ?? frames[0];
+ return <div className="rounded-[2rem] border border-foreground/10 bg-card/60 p-4 dark:bg-white/[0.04]">
+ <div className="overflow-hidden rounded-[1.6rem] bg-gradient-to-br from-liya-100 via-pink-100 to-white p-2 shadow-xl dark:from-liya-500/15 dark:via-pink-500/10 dark:to-white/5">
+ <Image src={frame.image} alt={`${frame.tag}: ${frame.title}`} width={1200} height={900} className="aspect-[4/3] w-full rounded-[1.2rem] object-cover" />
+ </div>
+ <div className="mt-4 flex items-center justify-between gap-2"><span className="flex items-center gap-2 text-xs font-black text-liya-700 dark:text-liya-300"><PackageCheck size={15}/>{frame.tag}</span><span className="rounded-full bg-green-600/10 px-2 py-1 text-[10px] font-black text-green-700 dark:text-green-300">CUSTOM IMAGE</span></div>
+ <h4 className="mt-2 text-xl font-black tracking-tight">{frame.title}</h4>
+ <p className="mt-1 text-sm leading-6 text-foreground/65">{frame.body}</p>
+ <div className="mt-3 flex flex-wrap gap-2">{frame.chips.map((chip) => <span key={chip} className="rounded-full bg-black/5 px-2.5 py-1 text-[11px] font-bold dark:bg-white/10">{chip}</span>)}</div>
+ <div className="mt-4 space-y-2"><div className="h-2 rounded-full bg-black/10 dark:bg-white/10"><div className="h-2 rounded-full bg-liya-500" style={{ width: `${58 + active * 7}%` }} /></div><div className="flex justify-between text-[11px] font-bold text-foreground/55"><span>{frame.footer}</span><span>{active + 1}/6</span></div></div>
+ </div>;
+}
+
 export default function HowItWorksPage() {
  const [active, setActive] = useState(0);
+ const [lab, setLab] = useState(0);
  const ActiveIcon = flow[active].icon;
+ const selectedLab = labScenarios[lab];
+ const readiness = 72 + lab * 7;
 
  return <main className="min-h-screen soft-grid"><Header />
  <section className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
@@ -139,7 +240,7 @@ export default function HowItWorksPage() {
  <Card className="min-h-[430px] overflow-hidden">
  <motion.div key={active} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .28 }} className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
  <div><div className="grid h-16 w-16 place-items-center rounded-3xl bg-liya-500 text-white shadow-xl shadow-liya-500/20"><ActiveIcon size={28}/></div><p className="mt-5 text-sm font-bold text-liya-700 dark:text-liya-300">Step {active + 1} of 6</p><h3 className="mt-1 text-3xl font-black">{flow[active].title}</h3><p className="mt-3 text-lg leading-8 text-foreground/65">{flow[active].line}</p><div className="mt-6 flex items-center gap-2 rounded-2xl bg-green-600/10 p-3 text-sm font-semibold text-green-700 dark:text-green-300"><CheckCircle2 size={17}/> Judge-visible result in the product UI</div></div>
- <div className="rounded-[2rem] border border-dashed border-foreground/15 bg-card/60 p-5 dark:bg-white/[0.04]"><div className="grid aspect-[4/3] place-items-center rounded-[1.6rem] bg-gradient-to-br from-liya-100 to-pink-100 text-center dark:from-liya-500/15 dark:to-pink-500/10"><div><PackageCheck className="mx-auto mb-3 h-10 w-10 text-liya-500"/><b>{flow[active].screenshot}</b><p className="mt-2 max-w-xs text-sm text-foreground/55">Screenshot placeholder — add your final demo image here.</p></div></div></div>
+ <StepPreview active={active} />
  </motion.div>
  </Card>
  </div>
@@ -150,55 +251,38 @@ export default function HowItWorksPage() {
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-12">
- <div className="mb-5"><p className="text-sm font-bold text-liya-700 dark:text-liya-300">Feature map</p><h2 className="text-3xl font-black tracking-tight">What judges should notice</h2></div>
- <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{features.map(({ icon: Icon, title, text }) => <Card key={title} className="min-h-44"><Icon className="mb-4 h-7 w-7 text-liya-500"/><h3 className="font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-foreground/55">{text}</p></Card>)}</div>
+ <Card className="overflow-hidden p-0">
+ <div className="grid gap-0 lg:grid-cols-[360px_1fr]">
+ <div className="border-b border-foreground/10 p-5 lg:border-b-0 lg:border-r">
+ <p className="text-sm font-bold text-liya-700 dark:text-liya-300">Interactive judge lab</p>
+ <h2 className="mt-1 text-3xl font-black tracking-tight">Tap a scenario and watch Liya’s reasoning</h2>
+ <p className="mt-3 text-sm leading-6 text-foreground/60">This mini-console makes small but competition-visible features explicit: intent extraction, strategy selection, MCP query shaping, trust labels, and next-step nudges.</p>
+ <div className="mt-5 grid gap-2">{labScenarios.map((scenario, index) => <button key={scenario.label} onClick={() => setLab(index)} className={`focus-ring rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${lab === index ?"border-liya-300 bg-liya-50 text-liya-950 shadow-lg dark:border-liya-500/30 dark:bg-liya-500/15 dark:text-white" :"border-foreground/10 bg-black/5 hover:bg-liya-50 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"}`}>{scenario.label}</button>)}</div>
+ </div>
+ <motion.div key={selectedLab.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-5">
+ <div className="rounded-3xl bg-black/5 p-4 text-sm font-semibold dark:bg-foreground/10">Shopper says: “{selectedLab.prompt}”</div>
+ <div className="mt-4 grid gap-3 md:grid-cols-2">
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Detected context</b><div className="mt-3 flex flex-wrap gap-2">{selectedLab.detected.map((item) => <span key={item} className="rounded-full bg-green-600/10 px-3 py-1 text-xs font-black text-green-700 dark:text-green-300">{item}</span>)}</div></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Strategy</b><p className="mt-2 text-sm leading-6 text-foreground/60">{selectedLab.strategy}</p></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>MCP query shaped by Liya</b><code className="mt-2 block break-words rounded-2xl bg-black/5 p-3 text-xs dark:bg-black/30">{selectedLab.search}</code></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Trust + next action</b><p className="mt-2 text-sm leading-6 text-foreground/60">{selectedLab.trust}. Next: {selectedLab.next}.</p></div>
+ </div>
+ <div className="mt-5 rounded-3xl border border-liya-200 bg-liya-50/80 p-4 dark:border-liya-500/20 dark:bg-liya-500/10">
+ <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold text-liya-700 dark:text-liya-300">Checkout readiness</p><div className="mt-2 h-2 rounded-full bg-black/10 dark:bg-white/10"><div className="h-2 rounded-full bg-liya-500" style={{ width: `${readiness}%` }} /></div></div><span className="text-2xl font-black">{readiness}%</span></div>
+ <div className="mt-4 flex flex-wrap gap-2"><Link href={selectedLab.href}><Button size="sm">Run this path <ArrowRight size={15}/></Button></Link><Link href="/shop"><Button size="sm" variant="secondary">Try your own prompt</Button></Link></div>
+ </div>
+ </motion.div>
+ </div>
+ </Card>
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-12">
- <Card className="bg-card/90 shadow-xl">
- <h2 className="text-3xl font-black tracking-tight mb-4">Voice Features</h2>
- <p className="text-sm text-foreground/65 mb-4">
- Liya supports browser-based voice input and output for a more natural shopping experience. Built on Web Speech API with no external dependencies.
- </p>
- <div className="grid gap-4 md:grid-cols-2">
- <div className="rounded-2xl bg-black/5 p-4 dark:bg-foreground/10">
- <div className="flex items-center gap-2 mb-2"><Mic className="h-5 w-5 text-liya-500"/><h3 className="font-black">Voice Input</h3></div>
- <ul className="text-sm text-foreground/55 space-y-1">
- <li>• Uses SpeechRecognition API (Chrome/Safari)</li>
- <li>• Auto-detects language: si-LK, ta-LK, en-LK</li>
- <li>• Single-shot capture, fills input field</li>
- <li>• Graceful fallback if not supported</li>
- </ul>
- </div>
- <div className="rounded-2xl bg-black/5 p-4 dark:bg-foreground/10">
- <div className="flex items-center gap-2 mb-2"><Languages className="h-5 w-5 text-liya-500"/><h3 className="font-black">Language Detection</h3></div>
- <ul className="text-sm text-foreground/55 space-y-1">
- <li>• Sinhala: Unicode range 0D80-0DFF</li>
- <li>• Tamil: Unicode range 0B80-0BFF</li>
- <li>• Tanglish: Word patterns (akka, aiya, machan...)</li>
- <li>• Auto-updates tone and shopping flow</li>
- </ul>
- </div>
- <div className="rounded-2xl bg-black/5 p-4 dark:bg-foreground/10">
- <div className="flex items-center gap-2 mb-2"><Sparkles className="h-5 w-5 text-liya-500"/><h3 className="font-black">Voice Output</h3></div>
- <ul className="text-sm text-foreground/55 space-y-1">
- <li>• Uses speechSynthesis API</li>
- <li>• Reads assistant responses aloud</li>
- <li>• Rate: 1.02, Pitch: 1.05 for natural sound</li>
- <li>• Toggle on/off with speaker icon</li>
- </ul>
- </div>
- <div className="rounded-2xl bg-black/5 p-4 dark:bg-foreground/10">
- <div className="flex items-center gap-2 mb-2"><ShieldCheck className="h-5 w-5 text-liya-500"/><h3 className="font-black">Browser Support</h3></div>
- <ul className="text-sm text-foreground/55 space-y-1">
- <li>• Voice Output: Chrome, Safari, Edge ✅</li>
- <li>• Voice Input: Chrome, Safari (limited) ⚠️</li>
- <li>• Language Detection: All browsers ✅</li>
- <li>• No external APIs, runs locally</li>
- </ul>
- </div>
- </div>
- </Card>
+ <div className="mb-5"><p className="text-sm font-bold text-liya-700 dark:text-liya-300">Feature map</p><h2 className="text-3xl font-black tracking-tight">What judges should notice</h2></div>
+ <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">{features.slice(0, 8).map(({ icon: Icon, title, text }) => <Card key={title} className="min-h-44"><Icon className="mb-4 h-7 w-7 text-liya-500"/><h3 className="font-black">{title}</h3><p className="mt-2 text-sm leading-6 text-foreground/55">{text}</p></Card>)}</div><div className="mt-4 flex flex-wrap gap-2">{features.slice(8).map(({ title }) => <span key={title} className="rounded-full bg-card/80 px-3 py-1.5 text-xs font-bold text-foreground/60 shadow-sm dark:bg-white/[0.06]">+ {title}</span>)}</div>
+ </section>
+
+ <section className="mx-auto max-w-7xl px-4 pb-12">
+ <Card className="grid gap-4 lg:grid-cols-[.9fr_1.1fr] lg:items-center"><div><p className="text-sm font-bold text-liya-700 dark:text-liya-300">Local voice + language</p><h2 className="mt-1 text-3xl font-black tracking-tight">Built for how Sri Lankans actually ask</h2><p className="mt-3 leading-7 text-foreground/60">Sinhala, Tamil, Singlish/Tanglish and browser voice are shown as part of the shopping flow — not buried as a settings feature.</p></div><div className="grid gap-3 sm:grid-cols-3"><div className="rounded-3xl bg-black/5 p-4 dark:bg-foreground/10"><Mic className="mb-2 h-5 w-5 text-liya-500"/><b>Dictate</b><p className="mt-1 text-xs text-foreground/55">Tap Voice, speak, edit, send.</p></div><div className="rounded-3xl bg-black/5 p-4 dark:bg-foreground/10"><Languages className="mb-2 h-5 w-5 text-liya-500"/><b>Detect</b><p className="mt-1 text-xs text-foreground/55">Scripts + local words adjust tone.</p></div><div className="rounded-3xl bg-black/5 p-4 dark:bg-foreground/10"><Sparkles className="mb-2 h-5 w-5 text-liya-500"/><b>Reply</b><p className="mt-1 text-xs text-foreground/55">Warm local assistant style.</p></div></div></Card>
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-12">
@@ -217,7 +301,7 @@ export default function HowItWorksPage() {
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-16">
- <div className="rounded-[2rem] bg-ink p-6 text-white shadow-2xl shadow-black/15 dark:bg-white dark:text-ink"><div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"><div><h3 className="text-2xl font-black">Ready for the 2-minute judge path?</h3><p className="mt-1 text-white/65 dark:text-foreground/60">Runs the apology/birthday/Kandy/payment-link story with live MCP search and fallback safety.</p></div><Link href="/demo"><Button size="lg" className="bg-white text-ink hover:bg-card/90 dark:bg-ink dark:text-white">Start Judge Demo <ArrowRight size={18}/></Button></Link></div></div>
+ <div className="rounded-[2rem] bg-ink p-6 text-white shadow-2xl shadow-black/15 dark:bg-white dark:text-gray-900"><div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"><div><h3 className="text-2xl font-black">Ready for the 2-minute judge path?</h3><p className="mt-1 text-white/65 dark:text-gray-600">Runs the apology/birthday/Kandy/payment-link story with live MCP search and fallback safety.</p></div><Link href="/demo"><Button size="lg" className="bg-white text-ink hover:bg-card/90 dark:bg-ink dark:text-white">Start Judge Demo <ArrowRight size={18}/></Button></Link></div></div>
  </section>
  </main>;
 }

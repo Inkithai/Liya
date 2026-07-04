@@ -3,7 +3,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from"react";
 import { ArrowUp, Gift, Languages, Mic, MicOff, PlayCircle, RotateCcw, Sparkles, Volume2, Wand2 } from"lucide-react";
 import { toast } from"sonner";
 import { motion } from"framer-motion";
-import { detectLanguage } from"@/lib/language";
+import { detectLanguage, languageLabel } from"@/lib/language";
 import { extractContext } from"@/lib/personality";
 import { checkDelivery, searchProducts } from"@/lib/mcp";
 import { getFallbackProducts } from"@/lib/fallback-products";
@@ -19,9 +19,11 @@ const SpeechRecognitionCtor = () => {
 };
 
 type SpeechRecognition = {
- lang: string; interimResults: boolean; continuous: boolean;
- start: () => void; stop: () => void;
+ lang: string; interimResults: boolean; continuous: boolean; maxAlternatives?: number;
+ start: () => void; stop: () => void; abort?: () => void;
+ onstart: (() => void) | null;
  onresult: ((event: { results: ArrayLike<ArrayLike<{ transcript: string }>> }) => void) | null;
+ onerror: ((event: { error?: string }) => void) | null;
  onend: (() => void) | null;
 };
 
@@ -30,7 +32,9 @@ function chipToText(chip: string) {
  if (chip ==="Gift finder") return"I want to find a gift. Please ask me the 5 quick questions.";
  if (chip ==="Smart bundle") return"Build me a smart gift bundle with flowers, cake, chocolate and card.";
  if (chip ==="Delivery plan") return"Plan delivery for Kandy tomorrow under 10000.";
- if (chip ==="Trending") return"Show me trending popular gifts";
+ if (chip ==="Trending") return"Show me trending popular Kapruka products";
+ if (chip ==="Find onions") return"I need onions delivered to Colombo";
+ if (chip ==="Essentials") return"Find household essentials like detergent, coffee or groceries";
  if (chip ==="Track order") return"I want to track an order.";
  if (chip ==="Reorder") return"I want to reorder a previous purchase.";
  if (chip ==="Prioritize speed") return"Prioritize speed and delivery reliability.";
@@ -79,16 +83,29 @@ export function ChatPanel() {
  const prefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
  const prefetched = useRef(false);
  const autoDemoStarted = useRef(false);
+ const messagesEndRef = useRef<HTMLDivElement | null>(null);
+ const recognitionRef = useRef<SpeechRecognition | null>(null);
  const lastStrategy = useRef<string | undefined>(undefined);
  const lastStrategyShownAt = useRef(0);
  const progress = useMemo(() => [context.recipient, context.occasion, context.budget, context.location, context.deliveryDate, context.isGift !== undefined].filter(Boolean).length, [context]);
  const convergenceNow = useMemo(() => computeConvergenceState(context, cart.reduce((sum, item) => sum + item.quantity, 0)), [context, cart]);
+ const languageTitle = `Language: ${languageLabel(language)}. Auto-detected from your latest message; Sinhala/Tamil scripts and Singlish/Tanglish words adjust Liya’s tone.`;
 
  useEffect(() => {
  if (!demoStartedAt) return;
  const tick = setInterval(() => setElapsed(Math.floor((Date.now() - demoStartedAt) / 1000)), 500);
  return () => clearInterval(tick);
  }, [demoStartedAt]);
+
+ useEffect(() => {
+ messagesEndRef.current?.scrollIntoView({ behavior:"smooth", block:"end" });
+ }, [messages.length, isTyping]);
+
+ useEffect(() => () => {
+ if (prefetchTimer.current) clearTimeout(prefetchTimer.current);
+ recognitionRef.current?.abort?.();
+ recognitionRef.current = null;
+ }, []);
 
  useEffect(() => {
  if (autoDemoStarted.current || typeof window ==="undefined") return;
@@ -212,7 +229,8 @@ export function ChatPanel() {
  }
  const convergence = computeConvergenceState(updatedContext, cart.reduce((sum, item) => sum + item.quantity, 0));
  const checkoutNudge = convergence.readyForCheckout ?"review cart and create the payment link" : convergence.completeness >= 70 ? `shortlist the best 2 — ${convergence.completeness}% checkout-ready` : convergence.nextStep;
- const msg = contractForDecision(decision, { topName: ranked[0]?.name, count: ranked.length, delivery: deliveryLine.replace(/\s+/g,"").trim().replace(/^🚚\s*/,""), standout: delight.standout, convergenceNext: checkoutNudge });
+ const deliverySummary = deliveryLine.replace(/^\s*🚚\s*/,"").replace(/\s+/g," ").trim();
+ const msg = contractForDecision(decision, { topName: ranked[0]?.name, count: ranked.length, delivery: deliverySummary, standout: delight.standout, convergenceNext: checkoutNudge });
  addMessage({ role:"assistant", content: msg, language, chips: ["Choose perfect gift instantly","Add best pick","Compare top 3","Checkout"], decisionTrace: trace });
  speak(msg, voiceOut);
  toast.success(`Curated ${ranked.length} Kapruka picks`);
@@ -276,27 +294,61 @@ export function ChatPanel() {
  }
 
  function startVoice() {
+ if (listening) {
+ recognitionRef.current?.stop();
+ setListening(false);
+ return;
+ }
  const Ctor = SpeechRecognitionCtor();
  if (!Ctor) return toast.error("Voice input is not supported in this browser");
+ recognitionRef.current?.abort?.();
  const recognition = new Ctor();
+ recognitionRef.current = recognition;
  recognition.lang = language ==="si" ?"si-LK" : language ==="ta" ?"ta-LK" :"en-LK";
- recognition.interimResults = false; recognition.continuous = false;
- recognition.onresult = (event) => { const transcript = event.results[0]?.[0]?.transcript ??""; setInput(transcript); toast.success("Voice captured — edit or send when ready"); };
- recognition.onend = () => setListening(false);
- setListening(true); recognition.start();
+ recognition.interimResults = true;
+ recognition.continuous = false;
+ recognition.maxAlternatives = 1;
+ let captured = "";
+ recognition.onstart = () => setListening(true);
+ recognition.onresult = (event) => {
+ const transcript = Array.from(event.results).map((result) => result[0]?.transcript ??"").join(" ").replace(/\s+/g," ").trim();
+ if (transcript) {
+ captured = transcript;
+ setInput(transcript);
+ }
+ };
+ recognition.onerror = (event) => {
+ setListening(false);
+ recognitionRef.current = null;
+ if (event.error ==="no-speech") toast.message("I didn’t catch that — tap Voice and try again.");
+ else if (event.error ==="not-allowed" || event.error ==="service-not-allowed") toast.error("Microphone permission is blocked for this browser.");
+ else toast.error("Voice input stopped. You can tap Voice again.");
+ };
+ recognition.onend = () => {
+ setListening(false);
+ recognitionRef.current = null;
+ if (captured) toast.success("Voice captured — edit or send when ready");
+ };
+ try {
+ recognition.start();
+ } catch {
+ recognitionRef.current = null;
+ setListening(false);
+ toast.error("Voice input is already starting. Try again in a second.");
+ }
  }
 
- return <aside className="glass flex h-[calc(100vh-2rem)] min-h-[720px] flex-col rounded-[2rem] p-4" aria-label="AI shopping conversation">
- <div className="flex items-center justify-between border-b border-foreground/5 pb-4"><div><h1 className="flex items-center gap-2 text-xl font-black"><Sparkles className="text-liya-500"/> Liya</h1><p className="text-xs text-foreground/50">Friend-first shopping, powered by live Kapruka MCP</p></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Voice output" onClick={() => setVoiceOut((v) => !v)}><Volume2 size={17} className={voiceOut ?"text-liya-500" :""}/></Button><Button variant="ghost" size="sm" aria-label="Language"><Languages size={17}/>{language.toUpperCase()}</Button><Button variant="ghost" size="sm" aria-label="Reset chat" onClick={reset}><RotateCcw size={17}/></Button></div></div>
+ return <aside className="glass flex h-[min(760px,calc(100vh-1.5rem))] min-h-[560px] flex-col rounded-[2rem] p-4 lg:h-full lg:min-h-0" aria-label="AI shopping conversation">
+ <div className="flex items-center justify-between border-b border-foreground/5 pb-4"><div><h1 className="flex items-center gap-2 text-xl font-black"><Sparkles className="text-liya-500"/> Liya</h1><p className="text-xs text-foreground/50">Friend-first shopping, powered by live Kapruka MCP</p></div><div className="flex gap-1"><Button variant="ghost" size="sm" aria-label="Voice output" title={voiceOut ?"Voice output is on — Liya will read short replies aloud" :"Voice output is off — tap to hear Liya speak"} onClick={() => setVoiceOut((v) => !v)}><Volume2 size={17} className={voiceOut ?"text-liya-500" :""}/></Button><Button variant="ghost" size="sm" aria-label="Language" title={languageTitle}><Languages size={17}/>{language.toUpperCase()}</Button><Button variant="ghost" size="sm" aria-label="Reset chat" title="Reset chat, shelf, comparison and memory for a fresh shopping journey" onClick={reset}><RotateCcw size={17}/></Button></div></div>
  <div className="mt-3 flex flex-wrap items-center gap-2">{demoLocked && <span className="rounded-full bg-ink px-3 py-1 text-xs font-bold text-white dark:bg-white dark:text-gray-900">Golden path locked</span>}</div>
- <div className="mt-3 grid grid-cols-[1fr_auto] items-center gap-3"><div className="grid grid-cols-6 gap-1" aria-label="Clarifying progress">{Array.from({ length: 6 }).map((_, i) => <span key={i} className={`h-1.5 rounded-full ${i < progress ?"bg-liya-500" :"bg-black/10 dark:bg-white/25"}`} />)}</div><span className="rounded-full bg-green-600/10 px-3 py-1 text-xs font-bold text-green-700 dark:text-green-300">{demoStartedAt ? `${elapsed}s / 120s` :"2-min target"}</span></div>
+ <div className="mt-3 grid grid-cols-[1fr_auto] items-center gap-3"><div className="grid grid-cols-6 gap-1" aria-label="Clarifying progress" title="Clarifying progress: recipient, occasion/item, budget, city, delivery date and gift/order type">{Array.from({ length: 6 }).map((_, i) => <span key={i} className={`h-1.5 rounded-full ${i < progress ?"bg-liya-500" :"bg-black/10 dark:bg-white/25"}`} />)}</div><span className="rounded-full bg-green-600/10 px-3 py-1 text-xs font-bold text-green-700 dark:text-green-300">{demoStartedAt ? `${elapsed}s / 120s` :"2-min target"}</span></div>
  {progress >= 3 && <div className="mt-3 rounded-2xl bg-card/70 px-3 py-2 text-xs text-foreground/80 dark:bg-foreground/10 dark:text-white/90">Locked: {convergenceNow.summary} · {convergenceNow.completeness}% ready</div>}
  {(memory.preferences.length > 0 || (memory.styleSignals?.length ?? 0) > 0) && <div className="mt-3 rounded-2xl bg-card/70 px-3 py-2 text-xs text-foreground/80 dark:bg-foreground/10 dark:text-white/90">Memory: {memory.preferences.length ? `likes ${memory.preferences.join(",")}` :"preferences forming"} {(memory.styleSignals?.length ?? 0) > 0 ? `· style ${memory.styleSignals.join(",")}` :""} · mood {memory.emotionalIntent}</div>}
  {prediction && <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="mt-3 rounded-2xl bg-liya-50 px-3 py-2 text-xs font-semibold text-liya-900 dark:bg-liya-500/10 dark:text-white">{prediction}</motion.div>}
- <div className="no-scrollbar min-h-[380px] flex-1 space-y-3 overflow-auto py-4">{messages.map((m) => <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={m.role ==="user" ?"ml-auto max-w-[86%] rounded-[1.5rem] bg-ink px-4 py-3 text-sm text-background shadow-sm" :"max-w-[92%] rounded-[1.5rem] bg-card px-4 py-3 text-sm text-foreground shadow-sm border border-border/40"}>
+ <div className="no-scrollbar min-h-[320px] flex-1 space-y-3 overflow-auto py-4" aria-live="polite">{messages.map((m) => <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={m.role ==="user" ?"ml-auto max-w-[86%] rounded-[1.5rem] bg-ink px-4 py-3 text-sm text-background shadow-sm dark:bg-white dark:text-gray-900" :"max-w-[92%] rounded-[1.5rem] bg-card px-4 py-3 text-sm text-foreground shadow-sm border border-border/40"}>
  <p className="whitespace-pre-wrap leading-relaxed break-words">{m.content}</p>{m.decisionTrace && <div className="mt-3 rounded-2xl border border-liya-300 bg-liya-50/80 p-3 text-xs text-liya-950 dark:border-liya-500/20 dark:bg-liya-500/10 dark:text-white/90"><div className="flex items-center gap-2 font-black"><Sparkles size={13}/>{m.decisionTrace.rows.find((r) => r.label ==="Plan")?.value ??"gift plan"}</div><div className="mt-2 flex flex-wrap gap-1.5">{m.decisionTrace.bullets.slice(0, 3).map((b) => <span key={b} className="rounded-full bg-card/80 px-2 py-1 font-semibold dark:bg-black/20">{b}</span>)}</div>{m.decisionTrace.warnings?.[0] ? <p className="mt-2 text-amber-800 dark:text-amber-200">⚠️ {m.decisionTrace.warnings[0]}</p> : null}</div>}{m.chips?.length ? <div className="mt-3 flex flex-wrap gap-2">{m.chips.map((chip) => <button key={chip} onClick={() => chip ==="Go to tracking" ? location.href ="/track" : chip ==="Go to review" ? location.href ="/review" : chip ==="Checkout" || chip ==="Generate gift message" ? location.href ="/checkout" : chip ==="Choose perfect gift instantly" ? choosePerfectGift() : chip ==="Add best pick" ? (() => { const p = useAppStore.getState().products[0]; if (p) { addToCart(p); toast.success("Best pick added — good choice."); } })() : handleSend(chipToText(chip))} className="focus-ring rounded-full bg-black/5 px-3 py-1 text-xs font-semibold hover:bg-liya-100 dark:bg-white/10 dark:hover:bg-white/20">{chip}</button>)}</div> : null}
- </motion.div>)}{isTyping && <TypingIndicator />}</div>
- <div className="no-scrollbar mb-3 flex gap-2 overflow-x-auto pb-1"><Button className="shrink-0" variant="secondary" size="sm" onClick={runDemo}><PlayCircle size={16}/> Demo Mode</Button><Button className="shrink-0" variant="secondary" size="sm" onClick={() => handleSend("Smart shopping planner for an occasion, budget, date and location") }><Wand2 size={16}/> Planner</Button><Button className="shrink-0" variant="secondary" size="sm" onClick={() => handleSend("Gift finder: ask me 5 guided questions") }><Gift size={16}/> Gift finder</Button><Button className="shrink-0 dark:bg-white/20 dark:text-white" variant="secondary" size="sm" onClick={startVoice}>{listening ? <MicOff size={16}/> : <Mic size={16}/>} Voice</Button></div>
- <form onSubmit={(e: FormEvent) => { e.preventDefault(); void handleSend(); }} className="flex items-end gap-2 rounded-[1.6rem] bg-white p-2 shadow-xl shadow-black/[0.04] dark:bg-white/10"><label className="sr-only" htmlFor="liya-input">Message Liya</label><textarea id="liya-input" value={input} onChange={(e) => handleInputChange(e.target.value)} rows={1} placeholder="Eg: My wife is angry, apology gift, Kandy tomorrow, Rs. 5,000…" className="max-h-32 flex-1 resize-none bg-transparent px-3 py-3 text-sm outline-none placeholder:text-foreground/35 dark:placeholder:text-white/70" onKeyDown={(e) => { if (e.key ==="Enter" && !e.shiftKey) { e.preventDefault(); void handleSend(); } }} /><Button type="submit" size="sm" aria-label="Send" className="dark:bg-white/20 dark:text-white"><ArrowUp size={17}/></Button></form>
+ </motion.div>)}{isTyping && <TypingIndicator />}<div ref={messagesEndRef} aria-hidden="true" /></div>
+ <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4"><Button className="w-full px-3" variant="secondary" size="sm" title="Run the judge demo path automatically" onClick={runDemo}><PlayCircle size={16}/> Demo</Button><Button className="w-full px-3" variant="secondary" size="sm" title="Let Liya ask for occasion/item, budget, date and location" onClick={() => handleSend("Smart shopping planner for an occasion, budget, date and location") }><Wand2 size={16}/> Planner</Button><Button className="w-full px-3" variant="secondary" size="sm" title="Start a guided gift-finder conversation" onClick={() => handleSend("Gift finder: ask me 5 guided questions") }><Gift size={16}/> Finder</Button><Button className={`w-full px-3 ${listening ?"bg-green-600 text-white hover:bg-green-600" :"dark:bg-white/20 dark:text-white"}`} variant="secondary" size="sm" onClick={startVoice} title={listening ?"Stop voice input" :"Start voice input and dictate into the message box"}>{listening ? <MicOff size={16}/> : <Mic size={16}/>} {listening ?"Stop" :"Voice"}</Button></div>
+ <form onSubmit={(e: FormEvent) => { e.preventDefault(); void handleSend(); }} className="flex min-w-0 items-end gap-2 rounded-[1.6rem] bg-white p-2 shadow-xl shadow-black/[0.04] dark:bg-white/10"><label className="sr-only" htmlFor="liya-input">Message Liya</label><textarea id="liya-input" value={input} onChange={(e) => handleInputChange(e.target.value)} rows={1} placeholder="Eg: My wife is angry, apology gift, Kandy tomorrow, Rs. 5,000…" className="max-h-32 min-w-0 flex-1 resize-none bg-transparent px-3 py-3 text-sm outline-none placeholder:text-foreground/35 dark:placeholder:text-white/70" onKeyDown={(e) => { if (e.key ==="Enter" && !e.shiftKey) { e.preventDefault(); void handleSend(); } }} /><Button type="submit" size="sm" aria-label="Send" title="Send message to Liya" className="shrink-0 dark:bg-white/20 dark:text-white"><ArrowUp size={17}/></Button></form>
  </aside>;
 }

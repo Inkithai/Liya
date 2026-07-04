@@ -184,7 +184,7 @@ export function detectConflicts(input: string, context: ShopperContext, memory: 
 export function detectAnchor(input: string, context: ShopperContext): OrchestratorDecision["anchor"] | undefined {
  const lower = input.toLowerCase().trim();
  if (!lower || !/[a-zA-Z\u0D80-\u0DFF\u0B80-\u0BFF]{2,}/.test(input) || /^([\p{Emoji_Presentation}\p{Extended_Pictographic}\s!?.,]){1,12}$/u.test(input)) {
- return { kind:"chaos", message:"No stress — I’ll keep us on the shopping path. Tell me who it’s for, or pick a safe gift lane.", searchHint:"popular gifts flowers cakes chocolates" };
+ return { kind:"chaos", message:"No stress — I’ll keep us on the shopping path. Tell me the item, person, city, date, or budget.", searchHint:"popular Kapruka products" };
  }
  if (/ignore everything|forget instructions|jailbreak|system prompt|developer message|api key|what.?s the api|backend|mcp endpoint|openai|gemini/i.test(input)) {
  return { kind:"technical", message:"I can keep that short: Liya uses Kapruka’s hosted shopping tools. For the demo, let’s use it to complete a real purchase path.", searchHint:"popular Kapruka gifts" };
@@ -199,6 +199,14 @@ export function detectAnchor(input: string, context: ShopperContext): Orchestrat
  return { kind:"topic_switch", message:"Got it — I’ll adjust the shelf, not restart the whole journey.", searchHint: undefined };
  }
  return undefined;
+}
+
+
+function directShoppingQuery(input: string) {
+ const clean = input.replace(/\b(please|pls|find|search|show|need|want|order|buy|deliver|delivery|to|for me)\b/gi," ").replace(/\s+/g," ").trim();
+ const broadProduct = /onion|vegetable|fruit|rice|coffee|tea|milk|grocery|groceries|detergent|soap|shampoo|diaper|medicine|vitamin|phone|iphone|samsung|laptop|electronics|shoe|shirt|dress|clothing|book|toy|perfume|watch/i.test(input);
+ if (!broadProduct) return undefined;
+ return clean.length >= 3 ? clean : input.trim();
 }
 
 export function uncertaintySignals(context: ShopperContext, memory: UserMemory, input: string) {
@@ -271,17 +279,23 @@ export function decide(input: string, context: ShopperContext, memory?: UserMemo
  else if (/checkout|pay|payment/i.test(input)) intent ="checkout";
  else if (/reorder|buy again/i.test(input)) intent ="reorder";
  else if (/trending|popular|best sellers|hot/i.test(input)) intent ="trend";
+ else if (directShoppingQuery(input)) intent ="search";
  else if (/recommend|show|find|search|bundle|plan|gift|cake|flower|chocolate|wife|mother|amma|birthday|anniversary|apology|urgent|forgot|angry|sorry|cheap|premium|phone|electronics|prioritize speed|prioritize emotion|emotional impact/i.test(lower) && missing.length <= 4) intent = conflicts.length && !/prioritize speed|prioritize emotion|emotional impact/i.test(lower) ?"question" :"search";
 
  const tone = toneLead(nextMemory.emotionalIntent, context.language);
  const followUp = intent ==="question" ? smartQuestion(context, nextMemory, strategy, conflicts) : undefined;
- const base = anchor?.searchHint ?? (intent ==="trend" ?"popular trending gifts flowers cakes chocolates Sri Lanka" : buildSearchQuery(context));
- const pref = nextMemory.preferences.join("");
- const strategyTerms = strategy.boosts.join("");
- const searchQueries = Array.from(new Set([
+ const directQuery = directShoppingQuery(input);
+ const base = anchor?.searchHint ?? (intent ==="trend" ?"popular trending Kapruka products Sri Lanka" : directQuery ?? buildSearchQuery(context));
+ const pref = nextMemory.preferences.join(" ");
+ const strategyTerms = strategy.boosts.join(" ");
+ const searchQueries = directQuery ? Array.from(new Set([
+ directQuery,
+ `${directQuery} Sri Lanka`,
+ `${directQuery} Kapruka`
+ ])).slice(0, 3) : Array.from(new Set([
  `${base} ${pref} ${strategyTerms}`.trim(),
  `${context.occasion ?? strategy.label} ${context.recipient ??"family"} ${pref} under ${context.budget ??""}`.trim(),
- strategy.id ==="relationship_repair" ?"apology roses chocolate sorry card gift" : strategy.id ==="urgent_delivery" ?"same day delivery cake flowers gift" : strategy.id ==="comfort_care" ?"get well fruit flowers comfort gift" :"best selling gift Sri Lanka"
+ strategy.id ==="relationship_repair" ?"apology roses chocolate sorry card gift" : strategy.id ==="urgent_delivery" ?"same day delivery cake flowers gift" : strategy.id ==="comfort_care" ?"get well fruit flowers comfort gift" :"best selling Kapruka products Sri Lanka"
  ])).slice(0, 3);
 
  const microAdjustment = anchor?.kind ==="topic_switch" ?"Let me adjust that quietly." : conflicts.length ?"Tiny tradeoff here — I’ll keep it practical." : uncertainty.length ?"I’ll keep one assumption loose." : undefined;
@@ -290,7 +304,7 @@ export function decide(input: string, context: ShopperContext, memory?: UserMemo
 }
 
 export function toneLead(intent: EmotionalIntent, language: Language ="en") {
- const local = language ==="tanglish" ?"hari," :"";
+ const local = language ==="tanglish" ?"hari, " :"";
  switch (intent) {
  case"apology": return `${local}That sounds stressful — but fixable. I’ll keep this gentle, sincere, and quick.`;
  case"urgent": return `${local}Aiyo, timing is the main character now. I’ll prioritize safer delivery choices first.`;
@@ -417,7 +431,7 @@ export function stableShelf(ranked: Product[], previous: Product[], context: Sho
 }
 
 export function responseContract(parts: { intent: string; action: string; next: string }) {
- const clean = (value: string) => value.replace(/\s+/g,"").trim().replace(/[.!?]+$/,"");
+ const clean = (value: string) => value.replace(/\s+/g," ").trim().replace(/[.!?]+$/,"");
  return `Got it — ${clean(parts.intent)}.\nI’ll ${clean(parts.action)}.\nNext: ${clean(parts.next)}.`;
 }
 
@@ -442,11 +456,21 @@ export function advisorSummary(products: Product[], context: ShopperContext, mem
 }
 
 export function comparisonRows(products: Product[], context: ShopperContext) {
- return products.slice(0, 3).map((p, i) => ({
+ const budget = context.budget;
+ return products.slice(0, 3).map((p, i) => {
+ const text = `${p.name} ${p.category ??""} ${p.description ??""}`.toLowerCase();
+ const overBudget = Boolean(budget && p.price && p.price > budget);
+ const budgetComfort = Boolean(budget && p.price && p.price <= budget * 0.9);
+ const emotional = /rose|flower|bouquet|chocolate|card|hamper|perfume|jewellery/.test(text);
+ const celebration = /cake|party|birthday|cupcake|bento/.test(text);
+ const practical = /grocery|onion|vegetable|detergent|soap|coffee|tea|rice|essential/.test(text);
+ const deliveryKnown = Boolean(context.location && context.deliveryDate);
+ return {
  name: p.name,
  price: formatLkr(p.price, p.currency),
- delivery: context.location ? `Check ${context.location}; ${i === 0 ?"safest pick" :"verify before pay"}` :"City needed",
- bestFor: i === 0 ?"Best overall" : i === 1 ?"Budget backup" :"Presentation",
- tradeoff: p.price && context.budget && p.price > context.budget ?"Over budget" : i === 0 ?"Fewest tradeoffs" :"Good but less aligned"
- }));
+ delivery: deliveryKnown ? `${context.location} on ${context.deliveryDate}; ${i === 0 ?"lowest risk among selected" :"verify before payment"}` : context.location ? `City set: ${context.location}; date needed` :"City/date needed",
+ bestFor: i === 0 ?"Best overall" : budgetComfort ?"Budget comfort" : overBudget ?"Premium stretch" : practical ?"Practical reorder" : celebration ?"Celebration impact" : emotional ?"Emotional impact" :"Backup option",
+ tradeoff: p.inStock === false ?"Stock risk" : !p.price ?"Price needs verification" : overBudget ?"Over budget" : !deliveryKnown ?"Delivery not fully confirmed" : i === 0 ?"Fewest tradeoffs" :"Good, but less aligned than the winner"
+ };
+ });
 }

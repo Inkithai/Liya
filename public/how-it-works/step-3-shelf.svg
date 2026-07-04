@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="0.52" stop-color="#ffedd5"/><stop offset="1" stop-color="#fce7f3"/></linearGradient><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#7c2d12" flood-opacity="0.14"/></filter></defs>
+<rect x="0" y="0" width="1200" height="900" rx="0" fill="url(#bg)" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="1020" cy="80" r="210" fill="#ec4899" opacity="0.13"/><circle cx="140" cy="810" r="230" fill="#f97316" opacity="0.14"/>
+<g filter="url(#shadow)"><rect x="70" y="58" width="1060" height="784" rx="42" fill="#ffffff" stroke="none" stroke-width="1" opacity="1"/></g>
+<rect x="70" y="58" width="1060" height="92" rx="42" fill="#140b07" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="125" cy="104" r="18" fill="#f97316"/><circle cx="175" cy="104" r="18" fill="#ec4899"/><circle cx="225" cy="104" r="18" fill="#16a34a"/>
+<text x="600" y="112" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffffff" text-anchor="middle">Liya judge demo screenshot</text>
+<text x="110" y="210" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="46" font-weight="900" fill="#1c120a" text-anchor="start">03 — Live MCP product shelf</text>
+<text x="112" y="260" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">Real Kapruka products appear with images, prices and trust</text>
+<text x="112" y="294" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">labels.</text>
+<rect x="112" y="340" width="300" height="270" rx="30" fill="#fffaf5" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<rect x="132" y="360" width="260" height="132" rx="22" fill="#fecaca" stroke="none" stroke-width="1" opacity="1"/>
+<text x="136" y="524" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" fill="#1c120a" text-anchor="start">6 Red Rose Bouquet</text>
+<text x="136" y="558" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#f97316" text-anchor="start">LKR 5,210</text>
+<rect x="136" y="572" width="138" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="205.0" y="597" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">Safe-to-buy</text>
+<rect x="442" y="454" width="300" height="270" rx="30" fill="#fffaf5" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<rect x="462" y="474" width="260" height="132" rx="22" fill="#fde68a" stroke="none" stroke-width="1" opacity="1"/>
+<text x="466" y="638" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" fill="#1c120a" text-anchor="start">Chocolate Hamper</text>
+<text x="466" y="672" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#f97316" text-anchor="start">LKR 4,500</text>
+<rect x="466" y="686" width="138" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="535.0" y="711" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">Budget-safe</text>
+<rect x="772" y="568" width="300" height="270" rx="30" fill="#fffaf5" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<rect x="792" y="588" width="260" height="132" rx="22" fill="#fbcfe8" stroke="none" stroke-width="1" opacity="1"/>
+<text x="796" y="752" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="19" font-weight="900" fill="#1c120a" text-anchor="start">Cake + Flowers</text>
+<text x="796" y="786" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#f97316" text-anchor="start">LKR 7,360</text>
+<rect x="796" y="800" width="98" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="845.0" y="825" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">Stretch</text>
+<rect x="112" y="682" width="108" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="166.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">live MCP</text>
+<rect x="234" y="682" width="128" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="298.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">image URLs</text>
+<rect x="376" y="682" width="148" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="450.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">stock status</text>
+<rect x="538" y="682" width="178" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="627.0" y="707" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">prices hydrated</text>
+<text x="1065" y="812" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" fill="#9a3412" text-anchor="end">liya-ten.vercel.app</text>
+</svg>

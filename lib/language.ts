@@ -2,13 +2,23 @@ import type { Language } from"@/types";
 
 const sinhala = /[\u0D80-\u0DFF]/;
 const tamil = /[\u0B80-\u0BFF]/;
-const tanglishWords = /\b(akka|aiya|machan|mata|ona|venum|nalla|seri|epdi|gift eka|delivery eka|lassana|podiyata|amma|thaththa)\b/i;
+const localRomanWords = /\b(akka|aiya|ayya|aiye|ane|hari|machan|machang|mata|mama|mage|oya|oyata|eyata|api|apita|eka|ekak|eken|kiyanna|balanna|danna|denna|ganna|ona|one|epa|thiyenawa|puluwan|kohomada|monawada|lassana|podiyata|amma|thaththa|nangi|malli|aiyo|aiyoo|vanakkam|enakku|ungal|unga|venum|vendum|nalla|seri|sari|epdi|eppadi|sapadu|gift eka|delivery eka)\b/i;
+const englishSignals = /\b(the|this|that|please|delivery|checkout|budget|gift|order|track|today|tomorrow|wife|friend|mother|father)\b/i;
 
 export function detectLanguage(text: string): Language {
  if (sinhala.test(text)) return"si";
  if (tamil.test(text)) return"ta";
- if (tanglishWords.test(text)) return"tanglish";
+ const localMatches = text.match(localRomanWords)?.length ?? 0;
+ const englishMatches = text.match(englishSignals)?.length ?? 0;
+ if (localMatches > 0 && (localMatches >= englishMatches || /\b(eka|ekak|mata|mama|oya|venum|nalla|seri|epdi)\b/i.test(text))) return"tanglish";
  return"en";
+}
+
+export function languageLabel(language: Language) {
+ if (language ==="si") return"Sinhala";
+ if (language ==="ta") return"Tamil";
+ if (language ==="tanglish") return"Singlish / Tanglish";
+ return"English";
 }
 
 export function liyaGreeting(language: Language) {
