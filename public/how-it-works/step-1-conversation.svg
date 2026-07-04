@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="0.52" stop-color="#ffedd5"/><stop offset="1" stop-color="#fce7f3"/></linearGradient><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#7c2d12" flood-opacity="0.14"/></filter></defs>
+<rect x="0" y="0" width="1200" height="900" rx="0" fill="url(#bg)" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="1020" cy="80" r="210" fill="#ec4899" opacity="0.13"/><circle cx="140" cy="810" r="230" fill="#f97316" opacity="0.14"/>
+<g filter="url(#shadow)"><rect x="70" y="58" width="1060" height="784" rx="42" fill="#ffffff" stroke="none" stroke-width="1" opacity="1"/></g>
+<rect x="70" y="58" width="1060" height="92" rx="42" fill="#140b07" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="125" cy="104" r="18" fill="#f97316"/><circle cx="175" cy="104" r="18" fill="#ec4899"/><circle cx="225" cy="104" r="18" fill="#16a34a"/>
+<text x="600" y="112" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffffff" text-anchor="middle">Liya judge demo screenshot</text>
+<text x="110" y="210" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="46" font-weight="900" fill="#1c120a" text-anchor="start">01 — Conversation start</text>
+<text x="112" y="260" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">A real human story enters Liya, not a search keyword.</text>
+<rect x="560" y="340" width="520" height="92" rx="28" fill="#0f0a06" stroke="none" stroke-width="1" opacity="1"/>
+<text x="588" y="374" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" fill="#f97316" text-anchor="start">Shopper</text>
+<text x="588" y="408" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#1c120a" text-anchor="start">I messed up. Wife is angry. Kandy tomorrow. Rs. 5,000.</text>
+<rect x="112" y="572" width="520" height="92" rx="28" fill="#fff7ed" stroke="none" stroke-width="1" opacity="1"/>
+<text x="140" y="606" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" font-weight="900" fill="#f97316" text-anchor="start">Liya</text>
+<text x="140" y="640" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="23" font-weight="700" fill="#1c120a" text-anchor="start">Aiyo — this is repair, not random flowers. I’ll keep it sincere.</text>
+<rect x="112" y="804" width="98" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="161.0" y="829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">apology</text>
+<rect x="224" y="804" width="86" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="267.0" y="829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">wife</text>
+<rect x="320" y="804" width="86" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="363.0" y="829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">Kandy</text>
+<rect x="416" y="804" width="108" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="470.0" y="829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">tomorrow</text>
+<rect x="538" y="804" width="118" height="38" rx="19" fill="#dcfce7" stroke="none" stroke-width="1" opacity="1"/><text x="597.0" y="829" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#166534" text-anchor="middle">Rs. 5,000</text>
+<circle cx="120" cy="897" r="24" fill="#f97316"/>
+<text x="120" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">1</text>
+<line x1="150" y1="897" x2="275" y2="897" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+<text x="120" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Intent</text>
+<circle cx="305" cy="897" r="24" fill="#f97316"/>
+<text x="305" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">2</text>
+<line x1="335" y1="897" x2="460" y2="897" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+<text x="305" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Context</text>
+<circle cx="490" cy="897" r="24" fill="#f97316"/>
+<text x="490" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">3</text>
+<line x1="520" y1="897" x2="645" y2="897" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+<text x="490" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Plan</text>
+<circle cx="675" cy="897" r="24" fill="#f97316"/>
+<text x="675" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">4</text>
+<line x1="705" y1="897" x2="830" y2="897" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+<text x="675" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Shelf</text>
+<circle cx="860" cy="897" r="24" fill="#f97316"/>
+<text x="860" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">5</text>
+<line x1="890" y1="897" x2="1015" y2="897" stroke="#fed7aa" stroke-width="8" stroke-linecap="round"/>
+<text x="860" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Cart</text>
+<circle cx="1045" cy="897" r="24" fill="#f97316"/>
+<text x="1045" y="905" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="20" font-weight="900" fill="#fff" text-anchor="middle">6</text>
+<text x="1045" y="952" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="17" font-weight="800" fill="#1c120a" text-anchor="middle">Checkout</text>
+<text x="1065" y="812" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" fill="#9a3412" text-anchor="end">liya-ten.vercel.app</text>
+</svg>

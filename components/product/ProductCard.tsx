@@ -1,5 +1,6 @@
 "use client";
 import Image from"next/image";
+import { useEffect, useMemo, useState } from"react";
 import { Eye, ExternalLink, Heart, Plus, Scale, Sparkles } from"lucide-react";
 import { motion } from"framer-motion";
 import { toast } from"sonner";
@@ -13,6 +14,21 @@ import { Button } from"@/components/ui/Button";
 const fallbackSvg = encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 450'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop stop-color='#fed7aa'/><stop offset='1' stop-color='#f9a8d4'/></linearGradient></defs><rect width='600' height='450' rx='42' fill='url(#g)'/><circle cx='300' cy='180' r='70' fill='rgba(255,255,255,.55)'/><text x='300' y='315' text-anchor='middle' font-family='Arial' font-size='38' font-weight='700' fill='#7c2d12'>Kapruka Gift</text></svg>`);
 const fallback = `data:image/svg+xml,${fallbackSvg}`;
 
+function normalizedImageSrc(value?: string) {
+ if (!value) return fallback;
+ const candidate = value.startsWith("//") ? `https:${value}` : value.trim();
+ try {
+ const url = new URL(candidate);
+ if (url.protocol !=="https:" && url.protocol !=="http:") return fallback;
+ if (url.protocol ==="http:" && url.hostname.endsWith("kapruka.com")) url.protocol ="https:";
+ if (url.protocol ==="http:") return fallback;
+ return url.toString();
+ } catch {
+ return fallback;
+ }
+}
+
+
 export function ProductCard({ product, context, featured = false }: { product: Product; context: ShopperContext; featured?: boolean }) {
  const addToCart = useAppStore((s) => s.addToCart);
  const toggleWishlist = useAppStore((s) => s.toggleWishlist);
@@ -25,10 +41,13 @@ export function ProductCard({ product, context, featured = false }: { product: P
  const badges = explanationBadges(product, context, memory);
  const trust = product.trust ==="fallback" ? { label:"Demo fallback", tone:"blue" as const } : productTrust(product, context);
  const emotionalLine = getEmotionalLine(context, product);
+ const preferredImage = useMemo(() => normalizedImageSrc(product.image || product.images?.[0]), [product.image, product.images]);
+ const [imageSrc, setImageSrc] = useState(preferredImage);
+ useEffect(() => setImageSrc(preferredImage), [preferredImage]);
  const explainDecision = () => {
  const boosted = badges.find((badge) => badge.startsWith("Boosted")) ?? `Boosted: ${context.occasion ??"gift fit"}`;
  const matched = badges.find((badge) => badge.startsWith("Matched")) ??"Matched: shopper story";
- const filtered = badges.find((badge) => badge.startsWith("Filtered")) ??"Filtered: weak emotional fit";
+ const filtered = badges.find((badge) => badge.startsWith("Checked") || badge.startsWith("Filtered")) ??"Checked: delivery and emotional fit";
  toast("Why Liya chose this", {
  description: `${matched} · ${boosted} · ${filtered} · avoided options that felt less personal.`,
  action: product.url ? { label:"Open", onClick: () => window.open(product.url,"_blank") } : undefined
@@ -41,7 +60,7 @@ export function ProductCard({ product, context, featured = false }: { product: P
  };
  return <motion.article layout initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="group overflow-hidden rounded-[2rem] border border-foreground/5 bg-card/85 shadow-xl shadow-black/[0.04] dark:bg-white/[0.06]">
  <div className="relative aspect-[4/3] overflow-hidden bg-liya-100/50">
- <Image src={product.image || fallback} alt={product.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes={featured ?"(min-width: 1024px) 35vw, 90vw" :"(min-width: 1024px) 22vw, 90vw"} />
+ <Image src={imageSrc} alt={product.name} fill className="object-cover transition duration-500 group-hover:scale-105" sizes={featured ?"(min-width: 1024px) 35vw, 90vw" :"(min-width: 1024px) 22vw, 90vw"} onError={() => setImageSrc(fallback)} />
  <div title={`Category: ${product.category ??"Kapruka"}`} className="absolute left-3 top-3 rounded-full bg-card/88 px-3 py-1 text-xs font-semibold shadow-lg backdrop-blur">{product.category ??"Kapruka"}</div>
  <div title={`Trust: ${trust.label}`} className={`absolute bottom-3 left-3 rounded-full px-3 py-1 text-xs font-black shadow-lg backdrop-blur ${trust.tone ==="green" ?"bg-green-600 text-white" : trust.tone ==="amber" ?"bg-amber-500 text-white" :"bg-card/90 text-ink"}`}>{trust.label}</div>
  <button title={wishlist ?"Remove from wishlist" :"Add to wishlist"} aria-label="Wishlist" onClick={() => { toggleWishlist(product); toast.success(wishlist ?"Removed from wishlist" :"Saved for later") }} className="focus-ring absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-full bg-card/88 shadow-lg backdrop-blur"><Heart size={18} className={wishlist ?"fill-pink-500 text-pink-500" :""}/></button>

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff7ed"/><stop offset="0.52" stop-color="#ffedd5"/><stop offset="1" stop-color="#fce7f3"/></linearGradient><filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="22" flood-color="#7c2d12" flood-opacity="0.14"/></filter></defs>
+<rect x="0" y="0" width="1200" height="900" rx="0" fill="url(#bg)" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="1020" cy="80" r="210" fill="#ec4899" opacity="0.13"/><circle cx="140" cy="810" r="230" fill="#f97316" opacity="0.14"/>
+<g filter="url(#shadow)"><rect x="70" y="58" width="1060" height="784" rx="42" fill="#ffffff" stroke="none" stroke-width="1" opacity="1"/></g>
+<rect x="70" y="58" width="1060" height="92" rx="42" fill="#140b07" stroke="none" stroke-width="1" opacity="1"/>
+<circle cx="125" cy="104" r="18" fill="#f97316"/><circle cx="175" cy="104" r="18" fill="#ec4899"/><circle cx="225" cy="104" r="18" fill="#16a34a"/>
+<text x="600" y="112" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#ffffff" text-anchor="middle">Liya judge demo screenshot</text>
+<text x="110" y="210" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="46" font-weight="900" fill="#1c120a" text-anchor="start">02 — Plan + memory</text>
+<text x="112" y="260" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="600" fill="#6b4b37" text-anchor="start">Liya turns messy text into a visible shopping strategy.</text>
+<rect x="112" y="340" width="460" height="92" rx="28" fill="#fff7ed" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="140" y="378" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Mood</text>
+<text x="140" y="412" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#1c120a" text-anchor="start">relationship repair</text>
+<rect x="620" y="454" width="468" height="92" rx="28" fill="#fff7ed" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="648" y="492" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Memory</text>
+<text x="648" y="526" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="24" font-weight="900" fill="#1c120a" text-anchor="start">likes roses + chocolate</text>
+<rect x="112" y="568" width="976" height="92" rx="28" fill="#fff7ed" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="142" y="606" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Plan</text>
+<text x="142" y="640" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="900" fill="#1c120a" text-anchor="start">Sincere bouquet, small sweet touch, avoid joke/practical gifts</text>
+<rect x="112" y="682" width="976" height="92" rx="28" fill="#f8fafc" stroke="#fed7aa" stroke-width="2" opacity="1"/>
+<text x="142" y="720" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="900" fill="#f97316" text-anchor="start">Constraints</text>
+<text x="142" y="754" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="25" font-weight="900" fill="#1c120a" text-anchor="start">Budget LKR 5,000 · City Kandy · Delivery tomorrow</text>
+<rect x="112" y="796" width="158" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="191.0" y="821" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">delivery risk</text>
+<rect x="284" y="796" width="168" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="368.0" y="821" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">budget comfort</text>
+<rect x="466" y="796" width="188" height="38" rx="19" fill="#ffedd5" stroke="none" stroke-width="1" opacity="1"/><text x="560.0" y="821" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="15" font-weight="800" fill="#9a3412" text-anchor="middle">emotional impact</text>
+<text x="1065" y="812" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="18" font-weight="800" fill="#9a3412" text-anchor="end">liya-ten.vercel.app</text>
+</svg>
