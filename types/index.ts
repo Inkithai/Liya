@@ -1,5 +1,5 @@
 export type Language ="en" |"si" |"ta" |"tanglish";
-export type Currency ="LKR" |"USD" |"AUD" |"GBP" |"EUR";
+export type Currency ="LKR" |"USD" |"AUD" |"GBP" |"EUR" |"CAD";
 
 export type ProductTrust ="safe" |"verify" |"fallback" |"stretch";
 export type ReliabilityMode ="live" |"degraded" |"fallback";

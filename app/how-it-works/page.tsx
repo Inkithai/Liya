@@ -61,14 +61,14 @@ const features = [
  { icon: Mic, title:"Voice", text:"Browser voice input and output for a more natural assistant feel." },
  { icon: RefreshCcw, title:"Reorder", text:"Recently viewed products become quick buy‑again choices." },
  { icon: Truck, title:"Delivery-aware filtering", text:"City, date and delivery risk shape product trust and checkout readiness." },
- { icon: ShieldCheck, title:"Security & Privacy", text:"End‑to‑end encryption and no data storage beyond session ensures safety." },
+ { icon: ShieldCheck, title:"Security & Privacy", text:"Hosted MCP boundary, no secret keys in the browser, and only session-local shopping memory." },
  { icon: AlertTriangle, title:"Accessibility", text:"ARIA‑compliant UI with high contrast mode for inclusive experience." },
  { icon: Clock3, title:"Fast Checkout", text:"Optimized 2‑minute payment flow with pre‑filled details and instant link." },
  { icon: Lock, title:"No Login Required", text:"Guest checkout flow without needing a user account." },
  { icon: Server, title:"Hosted MCP Only", text:"All product data comes from the hosted Kapruka MCP – no custom backend." },
  { icon: Bolt, title:"Performance", text:"Fast response times with lightweight client and parallel API calls." },
  { icon: Globe, title:"Scalability", text:"Handles many concurrent shoppers with low overhead." },
- { icon: Info, title:"Analytics", text:"Tracks conversion and engagement metrics for continuous improvement." }
+ { icon: Info, title:"Conversion signals", text:"Readiness bars, trust labels and next-step nudges make the 7-minute-to-2-minute improvement visible." }
 ];
 
 const differences = [
@@ -98,9 +98,45 @@ const replayScenarios = [
  { label:"Cheap but premium", href:"/shop?stress=conflict", before:"cheap but premium", after:"Tradeoff resolved calmly" }
 ];
 
+const labScenarios = [
+ {
+ label:"Forgot birthday",
+ prompt:"I forgot my wife’s birthday. Kandy tomorrow. Rs. 5,000.",
+ detected:["apology", "wife", "Kandy", "tomorrow", "Rs. 5,000"],
+ strategy:"Relationship repair → roses + chocolate + safer delivery",
+ search:"apology roses chocolate sorry card gift",
+ trust:"Safe-to-buy if city/date verified",
+ next:"Choose one standout or compare top 3",
+ href:"/demo"
+ },
+ {
+ label:"Not sure what to buy",
+ prompt:"Need a gift for my sister in Dambulla under 8k, maybe tomorrow.",
+ detected:["sister", "Dambulla", "budget", "tomorrow", "uncertain preference"],
+ strategy:"Value optimizer → ask one high-value question, keep shelf flexible",
+ search:"gift flowers cake chocolate sister under 8000",
+ trust:"Verify delivery before payment",
+ next:"Confirm occasion, then shortlist",
+ href:"/shop"
+ },
+ {
+ label:"Fast delivery rescue",
+ prompt:"Need something today for a colleague, Colombo, around Rs. 4,000.",
+ detected:["urgent", "colleague", "Colombo", "today", "Rs. 4,000"],
+ strategy:"Urgent delivery → in-stock, less custom, low risk",
+ search:"same day delivery cake flowers gift",
+ trust:"Prioritize stock + delivery confidence",
+ next:"Add safest pick, then checkout",
+ href:"/shop?stress=conflict"
+ }
+];
+
 export default function HowItWorksPage() {
  const [active, setActive] = useState(0);
+ const [lab, setLab] = useState(0);
  const ActiveIcon = flow[active].icon;
+ const selectedLab = labScenarios[lab];
+ const readiness = 72 + lab * 7;
 
  return <main className="min-h-screen soft-grid"><Header />
  <section className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
@@ -139,7 +175,7 @@ export default function HowItWorksPage() {
  <Card className="min-h-[430px] overflow-hidden">
  <motion.div key={active} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .28 }} className="grid gap-5 lg:grid-cols-[1fr_1.1fr]">
  <div><div className="grid h-16 w-16 place-items-center rounded-3xl bg-liya-500 text-white shadow-xl shadow-liya-500/20"><ActiveIcon size={28}/></div><p className="mt-5 text-sm font-bold text-liya-700 dark:text-liya-300">Step {active + 1} of 6</p><h3 className="mt-1 text-3xl font-black">{flow[active].title}</h3><p className="mt-3 text-lg leading-8 text-foreground/65">{flow[active].line}</p><div className="mt-6 flex items-center gap-2 rounded-2xl bg-green-600/10 p-3 text-sm font-semibold text-green-700 dark:text-green-300"><CheckCircle2 size={17}/> Judge-visible result in the product UI</div></div>
- <div className="rounded-[2rem] border border-dashed border-foreground/15 bg-card/60 p-5 dark:bg-white/[0.04]"><div className="grid aspect-[4/3] place-items-center rounded-[1.6rem] bg-gradient-to-br from-liya-100 to-pink-100 text-center dark:from-liya-500/15 dark:to-pink-500/10"><div><PackageCheck className="mx-auto mb-3 h-10 w-10 text-liya-500"/><b>{flow[active].screenshot}</b><p className="mt-2 max-w-xs text-sm text-foreground/55">Screenshot placeholder — add your final demo image here.</p></div></div></div>
+ <div className="rounded-[2rem] border border-foreground/10 bg-card/60 p-5 dark:bg-white/[0.04]"><div className="aspect-[4/3] rounded-[1.6rem] bg-gradient-to-br from-liya-100 to-pink-100 p-4 dark:from-liya-500/15 dark:to-pink-500/10"><div className="flex h-full flex-col justify-between rounded-[1.2rem] bg-card/85 p-4 shadow-xl dark:bg-black/25"><div><div className="flex items-center gap-2 text-xs font-black text-liya-700 dark:text-liya-300"><PackageCheck size={15}/>{flow[active].screenshot}</div><p className="mt-3 text-sm font-bold">{flow[active].line}</p></div><div className="space-y-2"><div className="h-2 rounded-full bg-liya-500" style={{ width: `${58 + active * 7}%` }} /><div className="flex justify-between text-[11px] font-bold text-foreground/55"><span>Intent</span><span>MCP</span><span>Checkout</span></div></div></div></div></div>
  </motion.div>
  </Card>
  </div>
@@ -147,6 +183,32 @@ export default function HowItWorksPage() {
 
  <section className="mx-auto max-w-7xl px-4 pb-12">
  <Card><div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center"><div><p className="text-sm font-bold text-liya-700 dark:text-liya-300">Proof of intelligence</p><h2 className="mt-1 text-3xl font-black tracking-tight">Before vs after Liya</h2><p className="mt-3 max-w-2xl text-foreground/60">One messy sentence becomes a decision, shortlist, cart and checkout path.</p></div><Link href="/demo"><Button>Replay magic gift decision <ArrowRight size={17}/></Button></Link></div><div className="mt-5 grid gap-3 md:grid-cols-3">{replayScenarios.map((scenario) => <Link key={scenario.label} href={scenario.href} className="focus-ring rounded-3xl bg-black/5 p-4 transition hover:bg-liya-50 dark:bg-foreground/10 dark:hover:bg-card/15"><b>{scenario.label}</b><div className="mt-3 text-sm text-foreground/55"><p>Before: {scenario.before}</p><p className="mt-1 font-bold text-liya-700 dark:text-liya-300">After: {scenario.after}</p></div></Link>)}</div></Card>
+ </section>
+
+ <section className="mx-auto max-w-7xl px-4 pb-12">
+ <Card className="overflow-hidden p-0">
+ <div className="grid gap-0 lg:grid-cols-[360px_1fr]">
+ <div className="border-b border-foreground/10 p-5 lg:border-b-0 lg:border-r">
+ <p className="text-sm font-bold text-liya-700 dark:text-liya-300">Interactive judge lab</p>
+ <h2 className="mt-1 text-3xl font-black tracking-tight">Tap a scenario and watch Liya’s reasoning</h2>
+ <p className="mt-3 text-sm leading-6 text-foreground/60">This mini-console makes small but competition-visible features explicit: intent extraction, strategy selection, MCP query shaping, trust labels, and next-step nudges.</p>
+ <div className="mt-5 grid gap-2">{labScenarios.map((scenario, index) => <button key={scenario.label} onClick={() => setLab(index)} className={`focus-ring rounded-2xl border px-4 py-3 text-left text-sm font-bold transition ${lab === index ?"border-liya-300 bg-liya-50 text-liya-950 shadow-lg dark:border-liya-500/30 dark:bg-liya-500/15 dark:text-white" :"border-foreground/10 bg-black/5 hover:bg-liya-50 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"}`}>{scenario.label}</button>)}</div>
+ </div>
+ <motion.div key={selectedLab.label} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-5">
+ <div className="rounded-3xl bg-black/5 p-4 text-sm font-semibold dark:bg-foreground/10">Shopper says: “{selectedLab.prompt}”</div>
+ <div className="mt-4 grid gap-3 md:grid-cols-2">
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Detected context</b><div className="mt-3 flex flex-wrap gap-2">{selectedLab.detected.map((item) => <span key={item} className="rounded-full bg-green-600/10 px-3 py-1 text-xs font-black text-green-700 dark:text-green-300">{item}</span>)}</div></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Strategy</b><p className="mt-2 text-sm leading-6 text-foreground/60">{selectedLab.strategy}</p></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>MCP query shaped by Liya</b><code className="mt-2 block break-words rounded-2xl bg-black/5 p-3 text-xs dark:bg-black/30">{selectedLab.search}</code></div>
+ <div className="rounded-3xl bg-card/80 p-4 shadow-sm dark:bg-white/[0.05]"><b>Trust + next action</b><p className="mt-2 text-sm leading-6 text-foreground/60">{selectedLab.trust}. Next: {selectedLab.next}.</p></div>
+ </div>
+ <div className="mt-5 rounded-3xl border border-liya-200 bg-liya-50/80 p-4 dark:border-liya-500/20 dark:bg-liya-500/10">
+ <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><div><p className="text-xs font-bold text-liya-700 dark:text-liya-300">Checkout readiness</p><div className="mt-2 h-2 rounded-full bg-black/10 dark:bg-white/10"><div className="h-2 rounded-full bg-liya-500" style={{ width: `${readiness}%` }} /></div></div><span className="text-2xl font-black">{readiness}%</span></div>
+ <div className="mt-4 flex flex-wrap gap-2"><Link href={selectedLab.href}><Button size="sm">Run this path <ArrowRight size={15}/></Button></Link><Link href="/shop"><Button size="sm" variant="secondary">Try your own prompt</Button></Link></div>
+ </div>
+ </motion.div>
+ </div>
+ </Card>
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-12">
@@ -217,7 +279,7 @@ export default function HowItWorksPage() {
  </section>
 
  <section className="mx-auto max-w-7xl px-4 pb-16">
- <div className="rounded-[2rem] bg-ink p-6 text-white shadow-2xl shadow-black/15 dark:bg-white dark:text-ink"><div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"><div><h3 className="text-2xl font-black">Ready for the 2-minute judge path?</h3><p className="mt-1 text-white/65 dark:text-foreground/60">Runs the apology/birthday/Kandy/payment-link story with live MCP search and fallback safety.</p></div><Link href="/demo"><Button size="lg" className="bg-white text-ink hover:bg-card/90 dark:bg-ink dark:text-white">Start Judge Demo <ArrowRight size={18}/></Button></Link></div></div>
+ <div className="rounded-[2rem] bg-ink p-6 text-white shadow-2xl shadow-black/15 dark:bg-white dark:text-gray-900"><div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center"><div><h3 className="text-2xl font-black">Ready for the 2-minute judge path?</h3><p className="mt-1 text-white/65 dark:text-gray-600">Runs the apology/birthday/Kandy/payment-link story with live MCP search and fallback safety.</p></div><Link href="/demo"><Button size="lg" className="bg-white text-ink hover:bg-card/90 dark:bg-ink dark:text-white">Start Judge Demo <ArrowRight size={18}/></Button></Link></div></div>
  </section>
  </main>;
 }

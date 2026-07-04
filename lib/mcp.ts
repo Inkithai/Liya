@@ -42,26 +42,76 @@ async function parseResponse<T>(response: Response): Promise<JsonRpcResponse<T> 
  return JSON.parse(body) as JsonRpcResponse<T>;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+ return Boolean(value && typeof value ==="object" && !Array.isArray(value));
+}
+
+function toNumber(value: unknown): number | undefined {
+ if (typeof value ==="number") return Number.isFinite(value) ? value : undefined;
+ if (typeof value ==="string") {
+ const cleaned = value.replace(/[^0-9.]/g,"");
+ if (!cleaned) return undefined;
+ const parsed = Number(cleaned);
+ return Number.isFinite(parsed) ? parsed : undefined;
+ }
+ return undefined;
+}
+
+function parsePrice(raw: unknown): number | undefined {
+ const direct = toNumber(raw);
+ if (direct !== undefined) return direct;
+ if (isRecord(raw)) {
+ for (const key of ["amount","value","price","sale_price","lkr_price","LKR","lkr"]) {
+ const parsed = parsePrice(raw[key]);
+ if (parsed !== undefined) return parsed;
+ }
+ }
+ return undefined;
+}
+
+function parseCurrency(item: Record<string, unknown>, fallback: Currency | string ="LKR") {
+ if (typeof item.currency ==="string") return item.currency as Currency | string;
+ const price = item.price;
+ if (isRecord(price) && typeof price.currency ==="string") return price.currency as Currency | string;
+ return fallback;
+}
+
+function parseCategory(value: unknown): string | undefined {
+ if (typeof value ==="string") return value;
+ if (isRecord(value)) return String(value.name ?? value.title ?? value.slug ?? value.id ??"") || undefined;
+ return undefined;
+}
+
+function normalizeVariant(raw: unknown): { id: string; name: string; price?: number } | undefined {
+ if (!isRecord(raw)) return undefined;
+ const id = String(raw.id ?? raw.sku ?? raw.code ?? raw.name ?? crypto.randomUUID());
+ return {
+ id,
+ name: String(raw.name ?? raw.title ?? id),
+ price: parsePrice(raw.price ?? raw.sale_price ?? raw.amount ?? raw.lkr_price)
+ };
+}
+
 function normalizeProduct(raw: unknown): Product {
- const item = raw as Record<string, unknown>;
+ const item = isRecord(raw) ? raw : {};
  const id = String(item.id ?? item.product_id ?? item.productId ?? item.code ?? item.sku ?? item.url ?? crypto.randomUUID());
  const images = [item.image, item.image_url, item.thumbnail, item.photo, ...(Array.isArray(item.images) ? item.images : [])].filter(Boolean).map(String);
- const priceRaw = item.price ?? item.sale_price ?? item.amount ?? item.lkr_price;
- const price = typeof priceRaw ==="number" ? priceRaw : typeof priceRaw ==="string" ? Number(priceRaw.replace(/[^0-9.]/g,"")) : undefined;
+ const price = parsePrice(item.price ?? item.sale_price ?? item.amount ?? item.lkr_price);
+ const category = parseCategory(item.category);
  return {
  id,
  name: String(item.name ?? item.title ?? item.product_name ??"Kapruka product"),
  price: Number.isFinite(price ?? NaN) ? price : undefined,
- currency: String(item.currency ??"LKR") as Currency,
+ currency: parseCurrency(item),
  image: images[0],
  images,
  url: item.url ? String(item.url) : item.product_url ? String(item.product_url) : undefined,
- category: item.category ? String(item.category) : undefined,
+ category,
  description: item.description ? String(item.description) : item.summary ? String(item.summary) : undefined,
  inStock: typeof item.in_stock ==="boolean" ? item.in_stock : typeof item.inStock ==="boolean" ? item.inStock : undefined,
  rating: typeof item.rating ==="number" ? item.rating : undefined,
- deliveryNote: item.delivery_note ? String(item.delivery_note) : undefined,
- variants: Array.isArray(item.variants) ? item.variants as Product["variants"] : undefined,
+ deliveryNote: item.delivery_note ? String(item.delivery_note) : item.ships_internationally ?"Ships internationally" : undefined,
+ variants: Array.isArray(item.variants) ? item.variants.map(normalizeVariant).filter((v): v is { id: string; name: string; price?: number } => Boolean(v)) : undefined,
  raw
  };
 }
@@ -80,11 +130,49 @@ function extractJsonFromText(text: string): unknown {
 
 function unwrapToolResult(result: ToolResult | unknown): unknown {
  const tool = result as ToolResult;
- if (tool?.structuredContent) return tool.structuredContent;
  const content = tool?.content;
+ if (tool?.isError) {
+ const message = Array.isArray(content) ? content.map((entry) => entry.text ?? JSON.stringify(entry.json ?? entry)).join("\n") : "Kapruka MCP tool returned an error";
+ throw new McpError(message);
+ }
+ if (tool?.structuredContent) return tool.structuredContent;
  if (!Array.isArray(content)) return result;
  const parsed = content.map((entry) => entry.json ?? (entry.text ? extractJsonFromText(entry.text) : entry));
  return parsed.length === 1 ? parsed[0] : parsed;
+}
+
+function unwrapResultField(result: unknown): unknown {
+ const root = unwrapToolResult(result);
+ if (isRecord(root) && "result" in root && Object.keys(root).length === 1) {
+ const value = root.result;
+ return typeof value ==="string" ? extractJsonFromText(value) : value;
+ }
+ return root;
+}
+
+function productFromDetailMarkdown(markdown: string): Product | undefined {
+ const title = markdown.match(/^##\s+(.+)$/m);
+ const id = markdown.match(/\*\*ID\*\*:\s*`([^`]+)`/i);
+ const price = markdown.match(/\*\*Price\*\*:\s*(?:LKR|Rs\.?|රු)\s*([0-9,]+(?:\.\d+)?)/i);
+ const stock = markdown.match(/\*\*Stock\*\*:\s*([^\n]+)/i);
+ const category = markdown.match(/\*\*Category\*\*:\s*([^\n]+)/i);
+ const image = markdown.match(/\*\*Image\*\*:\s*(https?:\/\/\S+)/i);
+ const url = markdown.match(/\[View on Kapruka\]\((https?:\/\/[^)]+)\)/i);
+ if (!title || !id) return undefined;
+ return {
+ id: id[1],
+ name: title[1].trim(),
+ price: price ? Number(price[1].replace(/,/g,"")) : undefined,
+ currency:"LKR",
+ image: image?.[1],
+ images: image?.[1] ? [image[1]] : undefined,
+ url: url?.[1],
+ category: category?.[1]?.trim(),
+ inStock: stock ? /in stock/i.test(stock[1]) : undefined,
+ deliveryNote: /international shipping\*\*:\s*yes/i.test(markdown) ?"Ships internationally" : undefined,
+ description: markdown.split(/\n\n/).slice(1).join("\n\n").replace(/\*\*Image\*\*:[\s\S]*$/i,"").replace(/\s+/g," ").trim().slice(0, 260),
+ raw: markdown
+ };
 }
 
 function productsFromMarkdown(markdown: string): Product[] {
@@ -105,24 +193,47 @@ function productsFromMarkdown(markdown: string): Product[] {
  category:"Kapruka",
  inStock: /in stock/i.test(block),
  deliveryNote: /ships internationally/i.test(block) ?"Ships internationally" : undefined,
- description: block.replace(/\s+/g,"").slice(0, 220),
+ description: block.replace(/\s+/g," ").trim().slice(0, 220),
  raw: block
  });
  }
- return products;
+ const detail = products.length ? undefined : productFromDetailMarkdown(markdown);
+ return detail ? [detail] : products;
 }
 
 function extractProducts(data: unknown): Product[] {
- const root = unwrapToolResult(data);
+ const root = unwrapResultField(data);
  const candidates: unknown[] = [];
- if (typeof root ==="string") return productsFromMarkdown(root);
- if (Array.isArray(root)) candidates.push(...root);
- if (root && typeof root ==="object") {
- const r = root as Record<string, unknown>;
- for (const key of ["products","items","results","data"]) if (Array.isArray(r[key])) candidates.push(...(r[key] as unknown[]));
- for (const key of ["result","markdown","text"]) if (typeof r[key] ==="string") candidates.push(...productsFromMarkdown(r[key] as string));
+ const read = (value: unknown): void => {
+ if (typeof value ==="string") {
+ const parsed = extractJsonFromText(value);
+ if (parsed !== value) return read(parsed);
+ candidates.push(...productsFromMarkdown(value));
+ return;
  }
- return candidates.filter((x) => x && typeof x ==="object").map(normalizeProduct);
+ if (Array.isArray(value)) {
+ candidates.push(...value);
+ return;
+ }
+ if (isRecord(value)) {
+ for (const key of ["products","items","results","data"]) if (Array.isArray(value[key])) candidates.push(...(value[key] as unknown[]));
+ for (const key of ["product","item"]) if (isRecord(value[key])) candidates.push(value[key]);
+ for (const key of ["result","markdown","text"]) if (value[key] !== undefined) read(value[key]);
+ const looksLikeProduct = value.id || value.product_id || value.productId || value.sku || value.url;
+ if (looksLikeProduct && (value.name || value.title || value.product_name)) candidates.push(value);
+ }
+ };
+ read(root);
+ return Array.from(new Map(candidates.filter((x) => x && typeof x ==="object").map((x) => {
+ const product = normalizeProduct(x);
+ return [product.id, product] as const;
+ })).values());
+}
+
+function extractProduct(data: unknown): Product {
+ const products = extractProducts(data);
+ if (products[0]) return products[0];
+ return normalizeProduct(unwrapResultField(data));
 }
 
 export class KaprukaMcpClient {
@@ -133,6 +244,7 @@ export class KaprukaMcpClient {
  private initPromise?: Promise<void>;
  private id = 1;
  private inFlight = new Map<string, Promise<unknown>>();
+ private cache = new Map<string, { expires: number; value: unknown }>();
  private tools?: string[];
 
  constructor(options: McpClientOptions = {}) {
@@ -211,70 +323,113 @@ export class KaprukaMcpClient {
  async callTool<T = unknown>(name: string, args: Record<string, unknown> = {}): Promise<T> {
  await this.initialize();
  const key = stableKey({ name, args });
+ const cacheable = !/create_order/i.test(name);
+ const cached = cacheable ? this.cache.get(key) : undefined;
+ if (cached && cached.expires > Date.now()) return cached.value as T;
  const existing = this.inFlight.get(key);
  if (existing) return existing as Promise<T>;
- const promise = this.request<ToolResult>("tools/call", { name, arguments: { params: args } }).then((r) => unwrapToolResult(r) as T).finally(() => this.inFlight.delete(key));
+ const promise = this.request<ToolResult>("tools/call", { name, arguments: { params: args } }).then((r) => {
+ const value = unwrapToolResult(r) as T;
+ if (cacheable) {
+ const ttl = /list_categories|list_delivery_cities/i.test(name) ? 30 * 60_000 : /track_order|check_delivery/i.test(name) ? 60_000 : 5 * 60_000;
+ this.cache.set(key, { value, expires: Date.now() + ttl });
+ }
+ return value;
+ }).finally(() => this.inFlight.delete(key));
  this.inFlight.set(key, promise);
  return promise;
  }
 
  async searchProducts(args: { q: string; category?: string; min_price?: number; max_price?: number; in_stock_only?: boolean; sort?: string; limit?: number; cursor?: string; currency?: Currency | string }) {
- const data = await this.callTool("kapruka_search_products", compact({ limit: 12, currency:"LKR", ...args }));
- return { products: extractProducts(data), raw: data };
+ const params = compact({ limit: 12, currency:"LKR", response_format:"json", ...args });
+ const data = await this.callTool("kapruka_search_products", params);
+ const products = await this.hydrateProductsWithMissingPrices(extractProducts(data), String(params.currency ??"LKR"));
+ return { products, raw: data };
  }
 
  async getProduct(product_id: string, currency: Currency | string ="LKR") {
- const data = await this.callTool("kapruka_get_product", { product_id, currency });
- return { product: normalizeProduct(data), raw: data };
+ const data = await this.callTool("kapruka_get_product", { product_id, currency, response_format:"json" });
+ return { product: extractProduct(data), raw: data };
+ }
+
+ private async hydrateProductsWithMissingPrices(products: Product[], currency: Currency | string) {
+ const needsPrice = products.filter((product) => !Number.isFinite(product.price ?? NaN) || (product.price ?? 0) <= 0).slice(0, 12);
+ if (!needsPrice.length) return products;
+ const details = await Promise.allSettled(needsPrice.map((product) => this.getProduct(product.id, currency)));
+ const byId = new Map<string, Product>();
+ details.forEach((result, index) => {
+ if (result.status !=="fulfilled") return;
+ const original = needsPrice[index];
+ const detailed = result.value.product;
+ if (Number.isFinite(detailed.price ?? NaN) && (detailed.price ?? 0) > 0) byId.set(original.id, detailed);
+ });
+ return products.map((product) => {
+ const detailed = byId.get(product.id);
+ if (!detailed) return product.price === 0 ? { ...product, price: undefined } : product;
+ return {
+ ...product,
+ ...detailed,
+ id: product.id,
+ name: detailed.name || product.name,
+ image: detailed.image || product.image,
+ images: detailed.images?.length ? detailed.images : product.images,
+ url: detailed.url || product.url,
+ raw: { search: product.raw, detail: detailed.raw }
+ };
+ });
  }
 
  async listCategories(depth = 1) {
- const data = await this.callTool("kapruka_list_categories", { depth });
- const root = unwrapToolResult(data);
+ const data = await this.callTool("kapruka_list_categories", { depth, response_format:"json" });
+ const root = unwrapResultField(data);
  if (Array.isArray(root)) return root.map((x) => typeof x ==="string" ? x : String((x as Record<string, unknown>).name ?? (x as Record<string, unknown>).title ??"Category"));
- if (root && typeof root ==="object" && Array.isArray((root as Record<string, unknown>).categories)) return ((root as Record<string, unknown>).categories as unknown[]).map(String);
+ if (isRecord(root) && Array.isArray(root.categories)) return (root.categories as unknown[]).map((x) => typeof x ==="string" ? x : String((x as Record<string, unknown>).name ?? (x as Record<string, unknown>).title ??"Category"));
  return [];
  }
 
  async checkDelivery(city: string, delivery_date: string, product_id?: string): Promise<DeliveryQuote> {
- const data = await this.callTool("kapruka_check_delivery", compact({ city, delivery_date, product_id }));
- const r = data as Record<string, unknown>;
+ const data = await this.callTool("kapruka_check_delivery", compact({ city, delivery_date, product_id, response_format:"json" }));
+ const root = unwrapResultField(data);
+ const r = isRecord(root) ? root : {};
  return {
  available: Boolean(r.available ?? r.can_deliver ?? r.deliverable ?? true),
  city: String(r.city ?? city),
- date: String(r.delivery_date ?? delivery_date),
+ date: String(r.delivery_date ?? r.checked_date ?? delivery_date),
  fee: typeof r.rate ==="number" ? r.rate : typeof r.fee ==="number" ? r.fee : undefined,
  warning: r.warning ? String(r.warning) : r.perishable_warning ? String(r.perishable_warning) : undefined,
  cutoff: r.cutoff ? String(r.cutoff) : undefined,
- raw: data
+ raw: root
  };
  }
 
  async createOrder(input: CheckoutInput, cart: Array<{ product_id: string; quantity: number; note?: string }>): Promise<OrderResult> {
  const data = await this.callTool("kapruka_create_order", {
- cart,
- recipient: input.recipient,
- delivery: input.delivery,
- sender: input.sender,
+ cart: cart.map((item) => compact({ product_id: item.product_id, quantity: item.quantity, icing_text: item.note })),
+ recipient: { name: input.recipient.name, phone: input.recipient.phone },
+ delivery: compact({ address: input.recipient.address, city: input.delivery.city || input.recipient.city, date: input.delivery.date, instructions: input.delivery.instructions, location_type:"house" }),
+ sender: { name: input.sender.name },
  gift_message: input.giftMessage,
- currency: input.currency
+ currency: input.currency,
+ response_format:"json"
  });
- const r = data as Record<string, unknown>;
+ const root = unwrapResultField(data);
+ const r = isRecord(root) ? root : {};
  return {
- orderNumber: r.order_number ? String(r.order_number) : r.orderNumber ? String(r.orderNumber) : undefined,
- paymentUrl: r.payment_url ? String(r.payment_url) : r.paymentUrl ? String(r.paymentUrl) : r.pay_url ? String(r.pay_url) : undefined,
+ orderNumber: r.order_number ? String(r.order_number) : r.orderNumber ? String(r.orderNumber) : r.order_ref ? String(r.order_ref) : undefined,
+ paymentUrl: r.payment_url ? String(r.payment_url) : r.paymentUrl ? String(r.paymentUrl) : r.pay_url ? String(r.pay_url) : r.checkout_url ? String(r.checkout_url) : undefined,
  status: r.status ? String(r.status) : undefined,
  expiresAt: r.expires_at ? String(r.expires_at) : undefined,
- raw: data
+ raw: root
  };
  }
 
  async trackOrder(order_number: string): Promise<TrackingResult> {
- const data = await this.callTool("kapruka_track_order", { order_number });
- const r = data as Record<string, unknown>;
+ const data = await this.callTool("kapruka_track_order", { order_number, response_format:"json" });
+ const root = unwrapResultField(data);
+ const r = isRecord(root) ? root : {};
  const rawStages = Array.isArray(r.timeline) ? r.timeline : Array.isArray(r.stages) ? r.stages : [];
  return {
- orderNumber: String(r.order_number ?? order_number),
+ orderNumber: String(r.order_number ?? r.orderNumber ?? order_number),
  status: String(r.status ??"Processing"),
  recipient: r.recipient ? String(r.recipient) : undefined,
  items: Array.isArray(r.items) ? r.items as TrackingResult["items"] : undefined,
@@ -289,7 +444,7 @@ export class KaprukaMcpClient {
  { label:"Out for delivery", status:"upcoming" },
  { label:"Delivered", status:"upcoming" }
  ],
- raw: data
+ raw: root
  };
  }
 }
